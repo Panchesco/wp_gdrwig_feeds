@@ -14,7 +14,9 @@
 	 public static function thumbs($data,$resolution='thumbnail')
 	 {
 	 
-	 		if( ! in_array($resolution,ResponseHtml::availableResolutions($data)))
+	 
+	 
+	 		if( ! empty($data) && ! in_array($resolution,ResponseHtml::availableResolutions($data)))
 	 		{
 		 		
 		 		return 'Available resolutions are:<br>' . implode('<br>',ResponseHtml::availableResolutions($data));

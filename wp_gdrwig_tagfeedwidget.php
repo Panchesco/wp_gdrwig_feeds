@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Panchco Tag Feed Widget
+Plugin Name: Tag Feed Widget
 Plugin URI:
 Description: Display items from Instagram's tag feed.
 Author: Richard Whitmer
@@ -10,7 +10,7 @@ Author URI:
 
 
 
-class PanchcoTagFeedWidget extends WP_Widget
+class GdrwigTagFeedWidget extends WP_Widget
 {
 
 
@@ -18,11 +18,11 @@ class PanchcoTagFeedWidget extends WP_Widget
 	function __construct()
 	{
 		$widget_options = array(
-								'classname'	=> 'panchco-tag-feed-widget',
+								'classname'	=> 'gdrwig-tag-feed-widget',
 								'description' => 'Display items from Instagram\'s tag feed. API'
 		);
 		
-		parent::WP_Widget('panchco_tag_feed_widget','Panchco Tag Feed Widget',$widget_options);
+		parent::WP_Widget('gdrwid_tag_feed_widget','Tag Feed Widget',$widget_options);
 	}
 	
 	
@@ -87,10 +87,10 @@ class PanchcoTagFeedWidget extends WP_Widget
 
 
 
-function tag_feed_widget_init()
+function gdrwig_tag_feed_widget_init()
 {
-	register_widget('PanchcoTagFeedWidget');
+	register_widget('GdrwigTagFeedWidget');
 }
 
 
-add_action('widgets_init','tag_feed_widget_init');
+add_action('widgets_init','gdrwig_tag_feed_widget_init');

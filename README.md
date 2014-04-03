@@ -1,4 +1,4 @@
-panchco_tagfeedwidget
+wp_gdrwig_tagfeeds
 =====================
 
-WordPress Plugin for displaying items from Instagram's Tag Feed API
+WordPress Plugins for displaying items from Instagram's API
