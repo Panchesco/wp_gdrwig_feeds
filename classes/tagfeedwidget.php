@@ -1,18 +1,12 @@
 <?php
-/*
-Plugin Name: Tag Feed Widget
-Plugin URI:
-Description: Display items from Instagram's tag feed.
-Author: Richard Whitmer
-Version: 1
-Author URI:
-*/
 
+// If this file is called directly, abort.
+if ( ! defined( 'WPINC' ) ) {
+	die;
+} 
 
-
-class GdrwigTagFeedWidget extends WP_Widget
+class TagFeedWidget extends WP_Widget
 {
-
 
 
 	function __construct()
@@ -35,10 +29,7 @@ class GdrwigTagFeedWidget extends WP_Widget
 		$hashtag	= ( $instance['hashtag'] ) ? $instance['hashtag'] : '';
 		$response_count		= ( $instance['response_count'] ) ? $instance['response_count'] : 0;
 		
-		// Include CurlHelper and TagFeed classes for pulling in tagged items from IG.
-		require_once(__DIR__ . '/helpers/curlhelper.php');
-		require_once(__DIR__ . '/apis/instagram/responsehtml.php');
-		require_once(__DIR__ . '/apis/instagram/tagfeed.php');
+
 		
 		// Create TagFeed instance.
 		$feed = new TagFeed($instance['client_id'],$instance['hashtag'],$instance['response_count']);
@@ -50,12 +41,10 @@ class GdrwigTagFeedWidget extends WP_Widget
 		<div class="tag-feed"><?php echo ResponseHtml::thumbs($response->data,'standard_resolution'); ?></div>
 		<?php echo ResponseHtml::paginationButton($response); ?>
 
-		
 		<?php
 		
 	}
-	
-	
+		
 	
 	function form( $instance )
 	{
@@ -84,13 +73,3 @@ class GdrwigTagFeedWidget extends WP_Widget
 	}
 
 }
-
-
-
-function gdrwig_tag_feed_widget_init()
-{
-	register_widget('GdrwigTagFeedWidget');
-}
-
-
-add_action('widgets_init','gdrwig_tag_feed_widget_init');
