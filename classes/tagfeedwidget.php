@@ -5,7 +5,7 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 } 
 
-class TagFeedWidget extends WP_Widget
+class GdrwigTagFeedWidget extends WP_Widget
 {
 
 

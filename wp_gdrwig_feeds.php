@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Feeds Widget
+Plugin Name: GDRWIG Feeds Widget
 Plugin URI:
 Description: Display Instagram Items as widgets.
 Author: Richard Whitmer
@@ -26,7 +26,7 @@ require_once( plugin_dir_path( __FILE__ ) . 'classes/tagfeedwidget.php');
 
 function gdrwig_tag_feed_widget_init()
 {
-	register_widget('TagFeedWidget');
+	register_widget('GdrwigTagFeedWidget');
 }
 
 
