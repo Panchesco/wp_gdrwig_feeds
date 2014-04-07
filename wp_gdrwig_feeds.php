@@ -181,15 +181,31 @@ if ( ! defined( 'WPINC' ) ) {
 		    </div>
 		
 		    <?php
-		
-		    
+
 		}
 		
-			function myplugin_settings_section_1_callback() 
-			{
-			
-			   echo( 'Some info about this section.' );
-			}
+		
+		/**
+		 * Add settings link on activation page.
+		 * VIA http://www.wphub.com/adding-plugin-action-links/
+		 */
+		public static function actionLinks($links, $file) {
+		    static $this_plugin;
+		    
+		    if (!$this_plugin) {
+		        $this_plugin = plugin_basename(__FILE__);
+		    }
+		 
+		    // check to make sure we are on the correct plugin
+		    if ($file == $this_plugin) {
+		        // the anchor tag and href to the URL we want. For a "Settings" link, this needs to be the url of your settings page
+		        $settings_link = '<a href="' . get_bloginfo('wpurl') . '/wp-admin/admin.php?page=gdrwig_settings">Settings</a>';
+		        // add the link to the list
+		        array_unshift($links, $settings_link);
+		    }
+		 
+		    return $links;
+		}
 			
 		
 	}
@@ -198,5 +214,6 @@ if ( ! defined( 'WPINC' ) ) {
 
 add_action( 'admin_menu', array('GdrwigFeeds','settingsMenu' ));
 add_action( 'admin_init', array('GdrwigFeeds','Init'));
+add_filter('plugin_action_links', 'GdrwigFeeds::actionLinks', 10, 2);
 
 
