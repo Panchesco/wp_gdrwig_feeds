@@ -33,11 +33,6 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 
-
-/** Set Defaults **/
-//add_option( 'gdrwig_settings', array('client_id'=>'','client_secret'=>'','count'=>0));
-
-
 	class GdrwigFeeds {
 		
 		
@@ -48,15 +43,7 @@ if ( ! defined( 'WPINC' ) ) {
 				array(	'client_id'=>'',
 						'client_secret'=>'',
 						'count'=>0));
-						
-						
-			$options = extract(get_option('gdrwig_settings'));
-			
-			print_r('<pre>');
-			print_r($options['client_id']);
-			print_r('</pre>');
-			
-			
+
 		}
 		
 		
@@ -146,8 +133,6 @@ if ( ! defined( 'WPINC' ) ) {
 		}
 		
 		
-		
-		
 		/** Settings Page Content **/
 		function settingsPage() {
 		 
@@ -190,11 +175,6 @@ if ( ! defined( 'WPINC' ) ) {
 			   echo( 'Some info about this section.' );
 			}
 			
- 
-		
-		
-		
-		
 		
 	}
 
