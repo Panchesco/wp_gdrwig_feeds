@@ -42,6 +42,7 @@ if ( ! defined( 'WPINC' ) ) {
 			add_option( 'gdrwig_settings', 
 				array(	'client_id'=>'',
 						'client_secret'=>'',
+						'hashtag'=>'flowers',
 						'count'=>0));
 
 		}
@@ -74,6 +75,16 @@ if ( ! defined( 'WPINC' ) ) {
 		    /*1*/   'client_secret',
 		    /*2*/   'Client Secret',
 		    /*3*/   'GdrwigFeeds::client_secret_input',
+		    /*4*/   'gdrwig_settings',
+		    /*5*/   'gdrwig_settings_section_1'
+		    );
+		    
+		    
+		    // Count.
+		    add_settings_field(
+		    /*1*/   'hashtag',
+		    /*2*/   'Tag',
+		    /*3*/   'GdrwigFeeds::hashtag_input',
 		    /*4*/   'gdrwig_settings',
 		    /*5*/   'gdrwig_settings_section_1'
 		    );
@@ -114,6 +125,13 @@ if ( ! defined( 'WPINC' ) ) {
 			$option = get_option('gdrwig_settings');
 		 
 		    echo( '<input type="text" name="gdrwig_settings[client_id]" id="gdrwig_settings[client_id]" value="' . $option['client_id']  .'" />' );
+		}
+		
+		/** Hashtag Input **/
+		function hashtag_input() {
+		 
+		 	$option = get_option('gdrwig_settings');
+		    echo( '<input type="text" name="gdrwig_settings[hashtag]" id="gdrwig_settings[hashtag]" value="'. $option['hashtag'] .'" />' );
 		}
 		
 		
@@ -166,8 +184,6 @@ if ( ! defined( 'WPINC' ) ) {
 		
 		    
 		}
-		
-		
 		
 			function myplugin_settings_section_1_callback() 
 			{
