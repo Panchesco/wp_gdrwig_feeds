@@ -33,98 +33,174 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 
-// Include required files we'll be using.
-require_once( plugin_dir_path( __FILE__ ) . 'helpers/curlhelper.php');
-require_once( plugin_dir_path( __FILE__ ) . 'apis/instagram/responsehtml.php');
-require_once( plugin_dir_path( __FILE__ ) . 'apis/instagram/tagfeed.php');
-require_once( plugin_dir_path( __FILE__ ) . 'classes/tagfeedwidget.php');
 
-
+/** Set Defaults **/
+//add_option( 'gdrwig_settings', array('client_id'=>'','client_secret'=>'','count'=>0));
 
 
 	class GdrwigFeeds {
-	
 		
-			public static function  Init()
-			{
+		
+		function __construct()
+		{
+			/** Set Defaults **/
+			add_option( 'gdrwig_settings', 
+				array(	'client_id'=>'',
+						'client_secret'=>'',
+						'count'=>0));
+						
+						
+			$options = extract(get_option('gdrwig_settings'));
 			
-				register_setting(
-					'GdrwigFeeds_Vars_Group',
-					'GdrwigFeeds_Vars',
-					array('GdrwigFeeds','Validate')
-					);
-					
-					
-				add_settings_section(
-					'GdrwigFeeds_Vars_ID',
-					'GdrwigFeeds Vars Title',
-					array('Gdrwig Feeds','Overview'),
-					'Gdrwig_Page_Title'
-				);
-				
-				
-				
-					
-			}
+			print_r('<pre>');
+			print_r($options['client_id']);
+			print_r('</pre>');
 			
 			
-			
-			public static function Admin_Menus()
-			{
-			    
-			    if (!function_exists('current_user_can')
-			        ||
-			        !current_user_can('manage_options'))
-			            return;
-			
-			    if (function_exists('add_options_page'))
-			        add_options_page(
-			            'GdrwigFeeds',
-			            'GDRWIG Feeds',
-			            'manage_options',
-			            'gdrwig_feeds_api',
-			            array('GdrwigFeeds', 'OptionsPage'));
-			}
-			
-			
+		}
+		
+		
+		
+		/** Settings Initialization **/
+		public static function Init() 
+		{
+		 
+		     /** Setting section 1. **/
+		    add_settings_section(
+		    /*1*/   'gdrwig_settings_section_1',
+		    /*2*/   'Instagram Client App Settings',
+		    /*3*/   'gdrwig_settings_section_1_callback',
+		    /*4*/   'gdrwig_settings'
+		    );
+		     
+		    // Client ID.
+		    add_settings_field(
+		    /*1*/   'client_id',
+		    /*2*/   'Client ID',
+		    /*3*/   'GdrwigFeeds::client_id_input',
+		    /*4*/   'gdrwig_settings',
+		    /*5*/   'gdrwig_settings_section_1'
+		    );
+		    
+		    // Client Secret.
+		    add_settings_field(
+		    /*1*/   'client_secret',
+		    /*2*/   'Client Secret',
+		    /*3*/   'GdrwigFeeds::client_secret_input',
+		    /*4*/   'gdrwig_settings',
+		    /*5*/   'gdrwig_settings_section_1'
+		    );
+		    
+		    // Count.
+		    add_settings_field(
+		    /*1*/   'count',
+		    /*2*/   'Count (20 Max)',
+		    /*3*/   'GdrwigFeeds::count_input',
+		    /*4*/   'gdrwig_settings',
+		    /*5*/   'gdrwig_settings_section_1'
+		    );
+		    
+		 
+		    // Register the fields field with our settings group.
+		    register_setting( 'gdrwig_settings_group', 'gdrwig_settings');
+		    
+		}
 
+
+		/** Add Settings Page **/
+		public static function settingsMenu() {
 			
-			public static function Overview()
-			{
-				?>This is a demo of the Settings API.<?php
+			   		add_options_page(
+			   		/*1*/   'GDRWIG Settings',
+			   		/*2*/   'GDRWIG',
+			   		/*3*/   'manage_options',
+			   		/*4*/   'gdrwig_settings',
+			   		/*5*/   'GdrwigFeeds::settingsPage'
+			   		);
+ 
 			}
 			
 			
-			
-			public static function OptionsPage()
+		/** Client ID Input **/
+		function client_id_input() {
+		
+			$option = get_option('gdrwig_settings');
+		 
+		    echo( '<input type="text" name="gdrwig_settings[client_id]" id="gdrwig_settings[client_id]" value="' . $option['client_id']  .'" />' );
+		}
+		
+		
+		/** Client Secret Input **/
+		function client_secret_input() {
+		 
+		 	$option = get_option('gdrwig_settings');
+		    echo( '<input type="text" name="gdrwig_settings[client_secret]" id="gdrwig_settings[client_secret]" value="'. $option['client_secret'] .'" />' );
+		}
+		
+		
+		/** Count **/
+		function count_input() {
+		 
+		    $option = get_option('gdrwig_settings');
+		    echo( '<input type="text" name="gdrwig_settings[count]" id="gdrwig_settings[count]" value="'. $option['count']. '" />' );
+		}
+		
+		
+		
+		
+		/** Settings Page Content **/
+		function settingsPage() {
+		 
+		    ?>
+		     
+		    <div class="wrap">
+		
+		 
+		     <h2>GDRWIG</h2>
+		     <p>Some text describing what the plugin settings do.</p>
+		      
+		     <form method="post" action="options.php">
+		 
+		      <?php
+		       
+		      // Output the settings sections.
+		      do_settings_sections( 'gdrwig_settings' );
+		 
+		      // Output the hidden fields, nonce, etc.
+		      settings_fields( 'gdrwig_settings_group' );
+		 
+		      // Submit button.
+		      submit_button();
+		       
+		      ?>
+		 
+		     </form>
+		    </div>
+		
+		    <?php
+		
+		    
+		}
+		
+		
+		
+			function myplugin_settings_section_1_callback() 
 			{
 			
-                        $Demo_Vars = get_option('Demo_Vars');
-                        
-                        
-                        
-                        ?>
-                                <div class="wrap">
-                                        <?php screen_icon("options-general"); ?>
-                                        <h2>GDRWIG Feeds Settings <?php echo $Demo_Vars['Version']; ?></h2>
-                                        <p>Some instructions...</p>
-                                        <form action="options.php" method="post">
-                                                <?php settings_fields('Demo_Vars_Group'); ?>
-                                                <?php do_settings_sections('Demo_Page_Title'); ?>
-                                                <p class="submit">
-                                                        <input name="Submit" type="submit" class="button-primary" value="<?php esc_attr_e('Save 	Changes'); ?>" />
-                                                </p>
-                                        </form>
-                                </div>
-                        <?php
-                }
-
+			   echo( 'Some info about this section.' );
+			}
+			
+ 
+		
+		
+		
+		
+		
 	}
-	
-	
 
-add_action('admin_init',
-			array('GdrwigFeeds','Init'));
-			
-add_action('admin_menu',
-    array('GdrwigFeeds', 'Admin_Menus'));
+
+
+add_action( 'admin_menu', array('GdrwigFeeds','settingsMenu' ));
+add_action( 'admin_init', array('GdrwigFeeds','Init'));
+
+
