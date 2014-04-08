@@ -4,8 +4,6 @@
 	class ResponseHtml {
 
 	
-	
-	
 	/**
 	 * Return formatted html for response thumbnails.
 	 * @param $data array - image data array
@@ -13,25 +11,20 @@
 	 */
 	 public static function thumbs($data,$resolution='thumbnail')
 	 {
-	 
-	 
-	 
+
 	 		if( ! empty($data) && ! in_array($resolution,ResponseHtml::availableResolutions($data)))
 	 		{
 		 		
 		 		return 'Available resolutions are:<br>' . implode('<br>',ResponseHtml::availableResolutions($data));
 	 		}
 	 		
-
-	 		
 	 		$html = '';
+	 		
 		 	$i=1;
-		 	
-		 	
+
 		 	foreach($data as $row)
 		 	{
-		 	
-			 	
+		 			 	
 			 	$id				= ( isset( $row->id ) ) ? $row->id : '';
 			 	$tags			= ( isset( $row->tags ) ) ? implode(" ",$row->tags) : "";
 			 	$username		= ( isset( $row->user->username ) ) ? $row->user->username : '';
@@ -50,9 +43,9 @@
 			 			</div>
 			 			';
 			$i++;
+			
 		 	}
-		 	
-		 	
+
 		 	
 		 	return $html;
 

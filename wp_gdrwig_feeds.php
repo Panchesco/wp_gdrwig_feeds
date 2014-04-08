@@ -33,6 +33,16 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 
+	// Include CurlHelper and TagFeed classes for pulling in tagged items from IG.
+	require_once(__DIR__ . '/helpers/curlhelper.php');
+	require_once(__DIR__ . '/apis/instagram/responsehtml.php');
+	require_once(__DIR__ . '/apis/instagram/tagfeed.php');
+	require_once(__DIR__ . '/classes/tagfeedwidget.php');
+
+
+
+
+
 	class GdrwigFeeds {
 		
 		
@@ -42,7 +52,8 @@ if ( ! defined( 'WPINC' ) ) {
 			add_option( 'gdrwig_settings', 
 				array(	'client_id'=>'',
 						'client_secret'=>'',
-						'hashtag'=>'flowers',
+						'hashtag'=>'modigliani',
+						'resolution'=>'thumbnail',
 						'count'=>0));
 
 		}
@@ -80,7 +91,7 @@ if ( ! defined( 'WPINC' ) ) {
 		    );
 		    
 		    
-		    // Count.
+		    // Hashtag.
 		    add_settings_field(
 		    /*1*/   'hashtag',
 		    /*2*/   'Tag',
@@ -88,6 +99,16 @@ if ( ! defined( 'WPINC' ) ) {
 		    /*4*/   'gdrwig_settings',
 		    /*5*/   'gdrwig_settings_section_1'
 		    );
+		    
+		    // Image resolution.
+		    add_settings_field(
+		    /*1*/   'resolution',
+		    /*2*/   'Resolution',
+		    /*3*/   'GdrwigFeeds::resolution_dropdown',
+		    /*4*/   'gdrwig_settings',
+		    /*5*/   'gdrwig_settings_section_1'
+		    );
+		    
 		    
 		    // Count.
 		    add_settings_field(
@@ -101,6 +122,9 @@ if ( ! defined( 'WPINC' ) ) {
 		 
 		    // Register the fields field with our settings group.
 		    register_setting( 'gdrwig_settings_group', 'gdrwig_settings');
+		    
+		    // Register the stylesheet.
+		    wp_register_style( 'gdrwigStylesheet', plugins_url('assets/css/gdrwig-admin.css', __FILE__) );
 		    
 		}
 
@@ -143,6 +167,29 @@ if ( ! defined( 'WPINC' ) ) {
 		}
 		
 		
+		/** Resolution **/
+		function resolution_dropdown() {
+		 
+		 	$html		= '<select name="gdrwig_settings[resolution]" id="gdrwig_settings[resolution]">
+		 	';
+		    $opts		= get_option('gdrwig_settings');
+		    
+		    $options	= array('thumbnail'=>'Thumbnail','low_resolution'=>'Low Resolution','standard_resolution'=>'Standard Resolution');
+		    foreach($options as $key=>$row)
+		    {
+			   	$selected = ($opts['resolution']==$key) ? ' selected':''; 
+			   	$html.=		'	<option value="' . $key . '"' . $selected . '>' . $row . '</option>
+			   	';
+		    }
+		    
+		    $html.= '</select>
+		    ';
+		    
+		    echo $html;
+		    
+		}
+		
+		
 		/** Count **/
 		function count_input() {
 		 
@@ -179,9 +226,34 @@ if ( ! defined( 'WPINC' ) ) {
 		 
 		     </form>
 		    </div>
+		    
+		    <style>
+
+		    </style>
 		
+			<div class="thumbs-wrapper">
+		    <?php
+		    
+		    echo GdrwigFeeds::tagThumbs();
+		    
+		    ?>
+			</div>
 		    <?php
 
+		}
+		
+		
+		public static function tagThumbs()
+		{
+			
+					
+					$opts = get_option('gdrwig_settings');
+			
+					$feed = new TagFeed($opts['client_id'],$opts['hashtag'],$opts['count']);
+					
+					
+					return ResponseHtml::thumbs($feed->response()->data,$opts['resolution']);
+			
 		}
 		
 		
@@ -206,6 +278,18 @@ if ( ! defined( 'WPINC' ) ) {
 		 
 		    return $links;
 		}
+
+		
+		public static function adminStyles() 
+		{
+       /*
+        * It will be called only on your plugin admin page, enqueue our stylesheet here
+        */
+			wp_enqueue_style( 'gdrwigStylesheet' );
+	   	}
+		
+
+
 			
 		
 	}
@@ -214,6 +298,7 @@ if ( ! defined( 'WPINC' ) ) {
 
 add_action( 'admin_menu', array('GdrwigFeeds','settingsMenu' ));
 add_action( 'admin_init', array('GdrwigFeeds','Init'));
+add_action( 'admin_init', array('GdrwigFeeds','adminStyles'));
 add_filter('plugin_action_links', 'GdrwigFeeds::actionLinks', 10, 2);
 
 

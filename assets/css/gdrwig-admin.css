@@ -1,0 +1,23 @@
+		    	
+		    	
+		    	
+		    	
+		    	
+		    	.thumbs-wrapper .thumb
+		    	{
+		    		float: left;
+		    	}
+		    	
+		    	
+		    	.appearance.widgets.tag-feed .thumb
+		    	{
+			    	float:left;
+			    	margin: 0 10px 10px 0;
+		    	}
+		    	
+		    	.appearance.widgets.tag-feed .thumb img
+		    	{
+			    	
+			    	max-width: 90px;
+			    	display: block;
+		    	}
