@@ -23,8 +23,9 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-
 */
+
+
 
 
 // If this file is called directly, abort.
@@ -53,10 +54,12 @@ if ( ! defined( 'WPINC' ) ) {
 				array(	'ig_username'=>'',
 						'client_id'=>'',
 						'client_secret'=>'',
+						'redirect_uri'=>'http://localhost:8888/wp-admin/options-general.php?page=gdrwig_settings',
 						'feed'=>'hashtag',
 						'user_to_show'=>'',
 						'hashtag'=>'modigliani',
 						'resolution'=>'thumbnail',
+						'access_token'=>'',
 						'count'=>0));
 
 		}
@@ -66,12 +69,37 @@ if ( ! defined( 'WPINC' ) ) {
 		/** Settings Initialization **/
 		public static function Init() 
 		{
+		
+		
+			// Check URL for access Token
+			if( isset($_GET['code']))
+			{
+				GdrwigFeeds::accessTokenCurl($_GET['code']);
+			}
+			
+			
 		 
 		     /** Setting section 1. **/
 		    add_settings_section(
 		    /*1*/   'gdrwig_settings_section_1',
-		    /*2*/   'Instagram Client App Settings',
+		    /*2*/   'Instagram Client Info',
 		    /*3*/   'gdrwig_settings_section_1_callback',
+		    /*4*/   'gdrwig_settings'
+		    );
+		    
+		     /** Setting section 2. **/
+		    add_settings_section(
+		    /*1*/   'gdrwig_settings_section_2',
+		    /*2*/   'Instagram Client App Settings',
+		    /*3*/   'gdrwig_settings_section_2_callback',
+		    /*4*/   'gdrwig_settings'
+		    );
+		    
+		     /** Setting section 3. **/
+		    add_settings_section(
+		    /*1*/   'gdrwig_settings_section_3',
+		    /*2*/   'Instagram Authentication',
+		    /*3*/   'gdrwig_settings_section_3_callback',
 		    /*4*/   'gdrwig_settings'
 		    );
 		    
@@ -102,6 +130,15 @@ if ( ! defined( 'WPINC' ) ) {
 		    /*5*/   'gdrwig_settings_section_1'
 		    );
 		    
+		    // Client Secret.
+		    add_settings_field(
+		    /*1*/   'redirect_uri',
+		    /*2*/   'Redirect URI',
+		    /*3*/   'GdrwigFeeds::redirect_uri_input',
+		    /*4*/   'gdrwig_settings',
+		    /*5*/   'gdrwig_settings_section_1'
+		    );
+		    
 		    
 		    // Feed
 		    add_settings_field(
@@ -109,7 +146,7 @@ if ( ! defined( 'WPINC' ) ) {
 		    /*2*/   'Which Feed?',
 		    /*3*/   'GdrwigFeeds::feed_dropdown',
 		    /*4*/   'gdrwig_settings',
-		    /*5*/   'gdrwig_settings_section_1'
+		    /*5*/   'gdrwig_settings_section_2'
 		    );
 		    
 		    // Ig user to show
@@ -118,7 +155,7 @@ if ( ! defined( 'WPINC' ) ) {
 		    /*2*/   'Which User?',
 		    /*3*/   'GdrwigFeeds::ig_user_to_show_input',
 		    /*4*/   'gdrwig_settings',
-		    /*5*/   'gdrwig_settings_section_1'
+		    /*5*/   'gdrwig_settings_section_2'
 		    );
 		    
 		    
@@ -128,7 +165,7 @@ if ( ! defined( 'WPINC' ) ) {
 		    /*2*/   'Preferred Hashtag',
 		    /*3*/   'GdrwigFeeds::hashtag_input',
 		    /*4*/   'gdrwig_settings',
-		    /*5*/   'gdrwig_settings_section_1'
+		    /*5*/   'gdrwig_settings_section_2'
 		    );
 		    
 		    // Image resolution.
@@ -137,7 +174,7 @@ if ( ! defined( 'WPINC' ) ) {
 		    /*2*/   'Resolution',
 		    /*3*/   'GdrwigFeeds::resolution_dropdown',
 		    /*4*/   'gdrwig_settings',
-		    /*5*/   'gdrwig_settings_section_1'
+		    /*5*/   'gdrwig_settings_section_2'
 		    );
 		    
 		    
@@ -147,9 +184,10 @@ if ( ! defined( 'WPINC' ) ) {
 		    /*2*/   'Count (20 Max)',
 		    /*3*/   'GdrwigFeeds::count_input',
 		    /*4*/   'gdrwig_settings',
-		    /*5*/   'gdrwig_settings_section_1'
+		    /*5*/   'gdrwig_settings_section_2'
 		    );
 		    
+
 		 
 		    // Register the fields field with our settings group.
 		    register_setting( 'gdrwig_settings_group', 'gdrwig_settings');
@@ -161,6 +199,41 @@ if ( ! defined( 'WPINC' ) ) {
 		    wp_register_script( 'gdrwigAdminJs', plugins_url('assets/js/gdrwig-admin.js', __FILE__) );
 		    
 		}
+		
+		
+		/**
+		 * If code for getting access token exists, call for it.
+		 * @param $code string
+		 */
+		 public static function accessTokenCurl($code)
+		 {
+			 
+			 $opts = get_option('gdrwig_settings');
+			 
+			 $url	= 'https://api.instagram.com/oauth/access_token';
+			 
+			 $fields['client_id']			= urlencode($opts['client_id']);
+			 $fields['client_secret']		= urlencode($opts['client_secret']);
+			 $fields['grant_type']			= 'authorization_code';
+			 $fields['redirect_uri']		= urlencode($opts['redirect_uri']);
+			 $fields['code']				= urlencode($code);
+			 
+			 
+			 $response = json_decode(CurlHelper::postCurl($url,$fields));
+			 
+			 if(isset($response->access_token))
+			 {
+				 $opts['access_token'] = $response->access_token;
+				 update_option('gdrwig_settings',$opts);
+				 wp_redirect($opts['redirect_uri']); exit;
+			 	
+			 	} else {
+				 
+			 }
+			 
+			 
+		 }
+		 
 
 
 		/** Add Settings Page **/
@@ -191,6 +264,14 @@ if ( ! defined( 'WPINC' ) ) {
 			$option = get_option('gdrwig_settings');
 		 
 		    echo( '<input type="text" name="gdrwig_settings[client_id]" id="gdrwig_settings[client_id]" value="' . $option['client_id']  .'" />' );
+		}
+		
+		/** Redirect URL **/
+		function redirect_uri_input() {
+		
+			$option = get_option('gdrwig_settings');
+		 
+		    echo( '<input type="text" name="gdrwig_settings[redirect_uri]" id="gdrwig_settings[redirect_uri]" value="' . $option['redirect_uri']  .'" />' );
 		}
 		
 		/** Hashtag Input **/
@@ -271,14 +352,19 @@ if ( ! defined( 'WPINC' ) ) {
 		}
 		
 		
+		
+		
 		/** Settings Page Content **/
 		function settingsPage() {
-		 
+		
+			$opts = get_option('gdrwig_settings');
+
 		    ?>
 		     
 		    <div class="wrap">
 				
-				 
+				 	
+				 	
 				     <h2>GDRWIG</h2>
 				     <p>Some text describing what the plugin settings do.</p>
 				      
@@ -291,6 +377,16 @@ if ( ! defined( 'WPINC' ) ) {
 				 
 				      // Output the hidden fields, nonce, etc.
 				      settings_fields( 'gdrwig_settings_group' );
+				      
+				      
+				     ?>
+				     
+				     <div id="ig-auth"><a href="https://api.instagram.com/oauth/authorize/?client_id=<?php echo $opts['client_id'] ;?>&redirect_uri=<?php echo $opts['redirect_uri'] ;?>&response_type=code">Authorize on Instagram</a></div>
+				     
+				     
+				     <input type="hidden" name="gdrwig_settings[access_token]" id="gdrwig_settings[access_token]" value="<?php echo $opts['access_token'];?>">
+				     <?php 
+				     
 				 
 				      // Submit button.
 				      submit_button();
@@ -298,8 +394,8 @@ if ( ! defined( 'WPINC' ) ) {
 				      ?>
 				 
 				     </form>
-				
-				
+				     
+
 				    <div class="thumbs-wrapper">
 				    <?php
 				    
@@ -315,14 +411,12 @@ if ( ! defined( 'WPINC' ) ) {
 		
 		public static function tagThumbs()
 		{
-			
-					
+
 					$opts = get_option('gdrwig_settings');
 			
 					$feed = new TagFeed($opts['client_id'],$opts['hashtag'],$opts['count']);
 					
-					
-					return ResponseHtml::thumbs($feed->response()->data,$opts['resolution']);
+				return ResponseHtml::thumbs($feed->response()->data,$opts['resolution']);
 			
 		}
 		
@@ -368,6 +462,11 @@ if ( ! defined( 'WPINC' ) ) {
         */
 			wp_enqueue_script( 'gdrwigAdminJs');
 	   	}
+	   	
+	   	
+
+	   	
+	   	
 		
 
 
@@ -375,8 +474,7 @@ if ( ! defined( 'WPINC' ) ) {
 		
 	}
 
-
-
+// Add register iframe
 add_action( 'admin_menu', array('GdrwigFeeds','settingsMenu' ));
 add_action( 'admin_init', array('GdrwigFeeds','Init'));
 add_action( 'admin_init', array('GdrwigFeeds','adminStyles'));
