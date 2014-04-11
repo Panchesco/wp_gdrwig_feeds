@@ -56,7 +56,26 @@
 			 
 			 
 			 /**
-			  * Return Self/Feed response (this is the feed of images a user is subscribed to.
+			  * Return /users/user-id response.
+			  * Get basic information about a user. 
+			  * @param $access_token string
+			  * @param $id integer
+			  * @return object
+			  */
+			  public static function userId($access_token,$id)
+			  {
+				  
+				  	$endpoint = 'https://api.instagram.com/v1/users/' . $id . '/?access_token=' . $access_token;
+				  
+				 return json_decode(CurlHelper::getCurl($endpoint));
+
+				  
+			  }
+			 
+			 
+			 /**
+			  * Return /users/self/feed response 
+			  * This is the feed of media (images & video) a user is subscribed to.
 			  * @param $access_token string
 			  * @return object
 			  */
@@ -74,7 +93,8 @@
 			  
 			  
 			  /**
-			  * Return Self/Feed response (this is the feed of images a user is subscribed to.
+			  * Return /users/user-id/media/recent response  using access_token
+			  * This is the feed of media (images & video) for a given user-id.
 			  * @param $access_token string
 			  * @param $id integer
 			  * @return object
@@ -90,12 +110,41 @@
 			  }
 			  
 			  
+			  /**
+			  * Return /users/user-id/media/recent response using client_id
+			  * This is the feed of media (images & video) for a given user-id.
+			  * @param $client_id string
+			  * @param $id integer
+			  * @return object
+			  */
+			  public static function mediaRecentClientId($client_id,$id)
+			  {
+				  
+				  	$endpoint = 'https://api.instagram.com/v1/users/' . $id . '/media/recent/?client_id=' . $client_id . '&count=' . self::$count;
+				  
+				 return json_decode(CurlHelper::getCurl($endpoint));
+
+				  
+			  }
 			  
-			 
-			 
-			 
-			 
-			
+			  
+			  /**
+			  * Return /users/search response 
+			  * Search for a user by name
+			  * @param $access_token string
+			  * @param $q string
+			  * @return array
+			  */
+			  public static function search($access_token,$q)
+			  {
+				  
+				  	$endpoint = 'https://api.instagram.com/v1/users/search?q=' . $q . '&access_token=' . $access_token . '&count=' . self::$count;
+				  
+				 return json_decode(CurlHelper::getCurl($endpoint));
+
+				  
+			  }
+
 			
 			
 			

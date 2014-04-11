@@ -97,13 +97,7 @@ if ( ! defined( 'WPINC' ) ) {
 		    /*4*/   'gdrwig_settings'
 		    );
 		    
-		     /** Setting section 3. **/
-		    add_settings_section(
-		    /*1*/   'gdrwig_settings_section_3',
-		    /*2*/   'Instagram Authentication',
-		    /*3*/   'gdrwig_settings_section_3_callback',
-		    /*4*/   'gdrwig_settings'
-		    );
+		    
 		    
 		    // IG Username.
 		    add_settings_field(
@@ -279,7 +273,7 @@ if ( ! defined( 'WPINC' ) ) {
 		
 			$option = get_option('gdrwig_settings');
 		 
-		    echo( '<input type="text" name="gdrwig_settings[redirect_uri]" id="gdrwig_settings[redirect_uri]" value="' . $option['redirect_uri']  .'" />' );
+		    echo( '<input  type="text" name="gdrwig_settings[redirect_uri]" id="gdrwig_settings[redirect_uri]" value="' . $option['redirect_uri']  .'" />' );
 		}
 		
 		/** Hashtag Input **/
@@ -327,11 +321,7 @@ if ( ! defined( 'WPINC' ) ) {
 		 	';
 		    $opts		= get_option('gdrwig_settings');
 		    
-		    print_r('<pre>');
-			 print_r($opts);
-			 print_r('</pre>');
-		    
-		    $options	= array('self'=>'Mine','user'=>'User','hashtag'=>'Hashtag','popular'=>'Popular');
+		    $options	= array('user'=>'User','hashtag'=>'Hashtag','popular'=>'Popular');
 		    foreach($options as $key=>$row)
 		    {
 			   	$selected = ($opts['feed']==$key) ? ' selected':''; 
@@ -389,14 +379,29 @@ if ( ! defined( 'WPINC' ) ) {
 				      // Output the hidden fields, nonce, etc.
 				      settings_fields( 'gdrwig_settings_group' );
 				      
-				      UsersFeed::$count = $opts['count'];
-				      
-				      $mine = UsersFeed::mediaRecent($opts['access_token'],$opts['user']['id']);
-				      
-				      
-				      
+				     
+
 				     ?>
-				     <?php if(false === UsersFeed::accessTokenValid($opts['access_token'])) {?>
+				     
+				     
+				     <input type="hidden" name="gdrwig_settings[access_token]" id="gdrwig_settings[access_token]" value="<?php echo $opts['access_token'];?>">
+				     <input type="hidden" name="gdrwig_settings[user][id]" id="gdrwig_settings[user][id]" value="<?php echo $opts['user']['id'];?>">
+				     <input type="hidden" name="gdrwig_settings[user][username]" id="gdrwig_settings[user][username]" value="<?php echo $opts['user']['username'];?>">
+				     <input type="hidden" name="gdrwig_settings[user][full_name]" id="gdrwig_settings[user][full_name]" value="<?php echo $opts['user']['full_name'];?>">
+				     <input type="hidden" name="gdrwig_settings[user][profile_picture]" id="gdrwig_settings[user][profile_picture]" value="<?php echo $opts['user']['profile_picture'];?>">
+				     
+				     
+				     <?php 
+				     
+				 
+				      // Submit button.
+				      submit_button();
+				       
+				      ?>
+				      
+				      <h3>Instagram Authentication</h3>
+				      
+				      <?php if(false === UsersFeed::accessTokenValid($opts['access_token'])) {?>
 				     <div id="ig-auth">
 				     <p>It looks like you need to re/authorize this application.<br /> 
 				     <a href="https://api.instagram.com/oauth/authorize/?client_id=<?php echo $opts['client_id'] ;?>&redirect_uri=<?php echo $opts['redirect_uri'] ;?>&response_type=code">Authorize on Instagram</a></p></div>
@@ -407,35 +412,14 @@ if ( ! defined( 'WPINC' ) ) {
 				     
 				     <?php } ?>
 				     
-				     <input type="hidden" name="gdrwig_settings[access_token]" id="gdrwig_settings[access_token]" value="<?php echo $opts['access_token'];?>">
-				     <input type="hidden" name="gdrwig_settings[user][id]" id="gdrwig_settings[user][id]" value="<?php echo $opts['user']['id'];?>">
-				     <input type="hidden" name="gdrwig_settings[user][username]" id="gdrwig_settings[user][username]" value="<?php echo $opts['user']['username'];?>">
-				     <input type="hidden" name="gdrwig_settings[user][full_name]" id="gdrwig_settings[user][full_name]" value="<?php echo $opts['user']['full_name'];?>">
-				     <input type="hidden" name="gdrwig_settings[user][profile_picture]" id="gdrwig_settings[user][profile_picture]" value="<?php echo $opts['user']['profile_picture'];?>">
 				     
-				     
-				     
-				     
-				     <?php 
-				     
-				 
-				      // Submit button.
-				      submit_button();
-				       
-				      ?>
+				    <div class="thumbs-wrapper">
+				    
+				    </div><!-- /.thumbs-wrapper -->
 				 
 				     </form>
 				     
 
-				    <div class="thumbs-wrapper">
-				    <?php
-				    
-				    //echo GdrwigFeeds::tagThumbs();
-				    
-				    echo GdrwigFeeds::thumbs($mine,$opts['resolution']);
-				    
-				    ?>
-				    </div><!-- /.thumbs-wrapper -->
 			</div><!-- /.wrap -->
 		    <?php
 

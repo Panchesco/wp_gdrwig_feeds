@@ -52,6 +52,53 @@
 	 }
 	 
 	 
+	 /**
+	 * Return formatted html for /users/search response.
+	 * @param $data array - users data array
+	 * @return string
+	 */
+	 public static function searchProfiles($data,$options=array())
+	 {
+	 		
+	 		$html = '<ul class="users-search">
+	 		';
+	 		
+	 		
+	 		if(isset($options['user']['id']))
+	 		{
+		 		
+		 		$user_id = $options['user']['id'];
+		 		
+	 		} else {
+		 		
+		 		$user_id = NULL;
+
+	 		}
+	 		
+	 		
+	 		foreach($data as $key=>$row)
+	 		{
+		 		
+		 		$html.=	'	<li>
+		 						<ul id="' . $row->username .'" class="profile profile-' . ($key+1) . '">
+		 							<li class="profile-image"><img src="' . $row->profile_picture  . '" alt="' . $row->username .'"></li>
+		 							<li><a target="_blank" href="http://instagram.com/' . $row->username  . '">' . $row->username . '</a></li>
+		 							<li>' . $row->full_name . '</li>
+		 							<li>' . $row->id . '</li>
+		 						</ul>
+		 					</li>
+		 		';
+		 		
+	 		}
+	 		
+	 		$html.="</ul>";
+	 		
+	 		return $html;
+
+	 }
+	 
+
+	 
 	 /** 
 	  * If there are additional results available, return a "Show more" button.
 	  * @param $responseObject - response object
