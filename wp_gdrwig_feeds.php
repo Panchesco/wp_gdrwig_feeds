@@ -38,10 +38,8 @@ if ( ! defined( 'WPINC' ) ) {
 	require_once(__DIR__ . '/helpers/curlhelper.php');
 	require_once(__DIR__ . '/apis/instagram/responsehtml.php');
 	require_once(__DIR__ . '/apis/instagram/tagfeed.php');
+	require_once(__DIR__ . '/apis/instagram/usersfeed.php');
 	require_once(__DIR__ . '/classes/tagfeedwidget.php');
-
-
-
 
 
 	class GdrwigFeeds {
@@ -57,10 +55,14 @@ if ( ! defined( 'WPINC' ) ) {
 						'redirect_uri'=>'http://localhost:8888/wp-admin/options-general.php?page=gdrwig_settings',
 						'feed'=>'hashtag',
 						'user_to_show'=>'',
+						'user'=>array('id'=>'','username'=>'','full_name'=>'','profile_picture'),
 						'hashtag'=>'modigliani',
 						'resolution'=>'thumbnail',
 						'access_token'=>'',
 						'count'=>0));
+						
+						
+						
 
 		}
 		
@@ -210,6 +212,9 @@ if ( ! defined( 'WPINC' ) ) {
 			 
 			 $opts = get_option('gdrwig_settings');
 			 
+			 
+			 
+			 
 			 $url	= 'https://api.instagram.com/oauth/access_token';
 			 
 			 $fields['client_id']			= urlencode($opts['client_id']);
@@ -223,15 +228,18 @@ if ( ! defined( 'WPINC' ) ) {
 			 
 			 if(isset($response->access_token))
 			 {
-				 $opts['access_token'] = $response->access_token;
+				 $opts['access_token']		= $response->access_token;
+				 $opts['user']['id']		= $response->user->id;
+				 $opts['user']['username']	= $response->user->username;
+				 $opts['user']['full_name']	= $response->user->full_name;
+				 $opts['user']['profile_picture']	= $response->user->profile_picture;
 				 update_option('gdrwig_settings',$opts);
 				 wp_redirect($opts['redirect_uri']); exit;
 			 	
 			 	} else {
 				 
 			 }
-			 
-			 
+
 		 }
 		 
 
@@ -319,6 +327,10 @@ if ( ! defined( 'WPINC' ) ) {
 		 	';
 		    $opts		= get_option('gdrwig_settings');
 		    
+		    print_r('<pre>');
+			 print_r($opts);
+			 print_r('</pre>');
+		    
 		    $options	= array('self'=>'Mine','user'=>'User','hashtag'=>'Hashtag','popular'=>'Popular');
 		    foreach($options as $key=>$row)
 		    {
@@ -358,12 +370,11 @@ if ( ! defined( 'WPINC' ) ) {
 		function settingsPage() {
 		
 			$opts = get_option('gdrwig_settings');
+			
 
 		    ?>
 		     
 		    <div class="wrap">
-				
-				 	
 				 	
 				     <h2>GDRWIG</h2>
 				     <p>Some text describing what the plugin settings do.</p>
@@ -378,13 +389,33 @@ if ( ! defined( 'WPINC' ) ) {
 				      // Output the hidden fields, nonce, etc.
 				      settings_fields( 'gdrwig_settings_group' );
 				      
+				      UsersFeed::$count = $opts['count'];
+				      
+				      $mine = UsersFeed::mediaRecent($opts['access_token'],$opts['user']['id']);
+				      
+				      
 				      
 				     ?>
+				     <?php if(false === UsersFeed::accessTokenValid($opts['access_token'])) {?>
+				     <div id="ig-auth">
+				     <p>It looks like you need to re/authorize this application.<br /> 
+				     <a href="https://api.instagram.com/oauth/authorize/?client_id=<?php echo $opts['client_id'] ;?>&redirect_uri=<?php echo $opts['redirect_uri'] ;?>&response_type=code">Authorize on Instagram</a></p></div>
+
+				     <?php } else { ?>
 				     
-				     <div id="ig-auth"><a href="https://api.instagram.com/oauth/authorize/?client_id=<?php echo $opts['client_id'] ;?>&redirect_uri=<?php echo $opts['redirect_uri'] ;?>&response_type=code">Authorize on Instagram</a></div>
+				     <p>Your authorization is current.</p>
 				     
+				     <?php } ?>
 				     
 				     <input type="hidden" name="gdrwig_settings[access_token]" id="gdrwig_settings[access_token]" value="<?php echo $opts['access_token'];?>">
+				     <input type="hidden" name="gdrwig_settings[user][id]" id="gdrwig_settings[user][id]" value="<?php echo $opts['user']['id'];?>">
+				     <input type="hidden" name="gdrwig_settings[user][username]" id="gdrwig_settings[user][username]" value="<?php echo $opts['user']['username'];?>">
+				     <input type="hidden" name="gdrwig_settings[user][full_name]" id="gdrwig_settings[user][full_name]" value="<?php echo $opts['user']['full_name'];?>">
+				     <input type="hidden" name="gdrwig_settings[user][profile_picture]" id="gdrwig_settings[user][profile_picture]" value="<?php echo $opts['user']['profile_picture'];?>">
+				     
+				     
+				     
+				     
 				     <?php 
 				     
 				 
@@ -399,7 +430,9 @@ if ( ! defined( 'WPINC' ) ) {
 				    <div class="thumbs-wrapper">
 				    <?php
 				    
-				    echo GdrwigFeeds::tagThumbs();
+				    //echo GdrwigFeeds::tagThumbs();
+				    
+				    echo GdrwigFeeds::thumbs($mine,$opts['resolution']);
 				    
 				    ?>
 				    </div><!-- /.thumbs-wrapper -->
@@ -417,6 +450,14 @@ if ( ! defined( 'WPINC' ) ) {
 					$feed = new TagFeed($opts['client_id'],$opts['hashtag'],$opts['count']);
 					
 				return ResponseHtml::thumbs($feed->response()->data,$opts['resolution']);
+			
+		}
+		
+		
+		public static function thumbs($response,$resolution)
+		{
+			
+			return ResponseHtml::thumbs($response->data,$resolution);
 			
 		}
 		
