@@ -79,13 +79,12 @@ if ( ! defined( 'WPINC' ) ) {
 				GdrwigFeeds::accessTokenCurl($_GET['code']);
 			}
 			
-			
 		 
 		     /** Setting section 1. **/
 		    add_settings_section(
 		    /*1*/   'gdrwig_settings_section_1',
 		    /*2*/   'Instagram Client Info',
-		    /*3*/   'gdrwig_settings_section_1_callback',
+		    /*3*/   '',
 		    /*4*/   'gdrwig_settings'
 		    );
 		    
@@ -93,7 +92,7 @@ if ( ! defined( 'WPINC' ) ) {
 		    add_settings_section(
 		    /*1*/   'gdrwig_settings_section_2',
 		    /*2*/   'Instagram Client App Settings',
-		    /*3*/   'gdrwig_settings_section_2_callback',
+		    /*3*/   '',
 		    /*4*/   'gdrwig_settings'
 		    );
 		    
@@ -227,6 +226,7 @@ if ( ! defined( 'WPINC' ) ) {
 				 $opts['user']['username']	= $response->user->username;
 				 $opts['user']['full_name']	= $response->user->full_name;
 				 $opts['user']['profile_picture']	= $response->user->profile_picture;
+				 
 				 update_option('gdrwig_settings',$opts);
 				 wp_redirect($opts['redirect_uri']); exit;
 			 	
@@ -321,7 +321,7 @@ if ( ! defined( 'WPINC' ) ) {
 		 	';
 		    $opts		= get_option('gdrwig_settings');
 		    
-		    $options	= array('user'=>'User','hashtag'=>'Hashtag','popular'=>'Popular');
+		    $options	= array('user'=>'User','hashtag'=>'Hashtag');
 		    foreach($options as $key=>$row)
 		    {
 			   	$selected = ($opts['feed']==$key) ? ' selected':''; 
@@ -341,8 +341,45 @@ if ( ! defined( 'WPINC' ) ) {
 		function ig_user_to_show_input() {
 		
 			$option = get_option('gdrwig_settings');
-		 
-		    echo( '<input type="text" name="gdrwig_settings[ig_user_to_show]" id="gdrwig_settings[ig_user_to_show]" value="' . $option['ig_user_to_show']  .'" />' );
+
+		   ?>
+		   
+		   <h4>Currently Selected User</h4>
+		   <ul id="users-api-current">
+		   	<li><img id="users-api-current-img"  src="<?php echo $option['user']['profile_picture'];?>"></li>
+		   	<li><a target="_blank" id="users-api-current-profile" href="http://instagram.com/<?php echo $option['user']['username'] ;?>"><?php echo $option['user']['username'] ;?></a></li>
+		   </ul>
+		   
+		   <h4>User Search:</h4>
+		   
+		   <input data-search_value="q" type="text" name="gdrwig_settings[ig_user_to_show]" id="gdrwig_settings[ig_user_to_show]" value="<?php echo $option['ig_user_to_show']; ?>" /><a id="find-user" href="javascript:void(0);">Find User</a>
+		   <div id="user-search-results"></div>
+		   
+		   <script>
+		   
+		   (function($){
+			   
+			   $('#find-user').on('click',function(){
+				  q = $("input[data-search_value=q]").val();
+
+				  var url = '/wp-admin/admin-ajax.php?action=gdrwig_search_users';
+				  
+				  $.ajax({
+					  type: 'POST',
+					  url: url,
+					  data:{q:q},
+					  context: document.body
+				  }).done(function(data){
+					  $('#user-search-results').html(data);
+				  });
+			   });
+			   
+			   
+		   })(jQuery)
+		   
+		   </script>
+		   
+		   <?php
 		}
 		
 		
@@ -361,7 +398,6 @@ if ( ! defined( 'WPINC' ) ) {
 		
 			$opts = get_option('gdrwig_settings');
 			
-
 		    ?>
 		     
 		    <div class="wrap">
@@ -370,6 +406,12 @@ if ( ! defined( 'WPINC' ) ) {
 				     <p>Some text describing what the plugin settings do.</p>
 				      
 				     <form method="post" action="options.php">
+				     
+				     <input type="hidden" name="gdrwig_settings[access_token]" id="gdrwig_settings[access_token]" value="<?php echo $opts['access_token'];?>">
+				     <input type="hidden" class="users-api-id" name="gdrwig_settings[user][id]" id="gdrwig_settings[user][id]" value="<?php echo $opts['user']['id'];?>">
+				     <input type="hidden" class="users-api-username" name="gdrwig_settings[user][username]" id="gdrwig_settings[user][username]" value="<?php echo $opts['user']['username'];?>">
+				     <input type="hidden" class="users-api-full_name" name="gdrwig_settings[user][full_name]" id="gdrwig_settings[user][full_name]" value="<?php echo $opts['user']['full_name'];?>">
+				     <input type="hidden" class="users-api-profile_picture"name="gdrwig_settings[user][profile_picture]" id="gdrwig_settings[user][profile_picture]" value="<?php echo $opts['user']['profile_picture'];?>">
 				 
 				      <?php
 				       
@@ -378,17 +420,8 @@ if ( ! defined( 'WPINC' ) ) {
 				 
 				      // Output the hidden fields, nonce, etc.
 				      settings_fields( 'gdrwig_settings_group' );
-				      
-				     
 
 				     ?>
-				     
-				     
-				     <input type="hidden" name="gdrwig_settings[access_token]" id="gdrwig_settings[access_token]" value="<?php echo $opts['access_token'];?>">
-				     <input type="hidden" name="gdrwig_settings[user][id]" id="gdrwig_settings[user][id]" value="<?php echo $opts['user']['id'];?>">
-				     <input type="hidden" name="gdrwig_settings[user][username]" id="gdrwig_settings[user][username]" value="<?php echo $opts['user']['username'];?>">
-				     <input type="hidden" name="gdrwig_settings[user][full_name]" id="gdrwig_settings[user][full_name]" value="<?php echo $opts['user']['full_name'];?>">
-				     <input type="hidden" name="gdrwig_settings[user][profile_picture]" id="gdrwig_settings[user][profile_picture]" value="<?php echo $opts['user']['profile_picture'];?>">
 				     
 				     
 				     <?php 
@@ -489,19 +522,142 @@ if ( ! defined( 'WPINC' ) ) {
 	   	}
 	   	
 	   	
-
+	   	public static function searchUsers()
+	   	{
+		   	$opts = get_option('gdrwig_settings'); 
+		   	
+		   	$q = addslashes($_POST['q']);
+		   	
+		   	new UsersFeed(array('count'=>'5'));
+		   	$api = UsersFeed::search($opts['access_token'],$q);
+		   	
+		   	
+		   	if(isset($api->meta->code) && $api->meta->code==200)
+		   	{
+		   	
+		   		
+		   		
+		   		$html = '	<ul>
+		   						<li>
+		   				';
+		   				
+			   	
+				foreach($api->data as $key=>$row)
+				{
+					
+					$selected = ($row->id==$opts[user][id]) ? " checked" : "";
+				
+					$html.= '		<ul>
+										<li><a target="_blank" href="http://instagram.com/' . $row->username . '"><img src="' . $row->profile_picture . '" /></a></li>
+										<li><input class="user-data" type="radio" value="' . $row->id . '" name="gdrwig_settings[user][id]" id="gdrwig_settings[user][id]"' . $selected . ' data-id="' . $row->id . '" data-username="' . $row->username . '" data-full_name="' . $row->full_name . '" data-profile_picture="' . $row->profile_picture . '"> <a target="_blank" href="http://instagram.com/' . $row->username . '">' . $row->username . '</a>
+										</li>
+									</ul>
+							';
+					
+				}
+				$html.= '		</li>
+							</ul>
+				';
+				
+				$html.= '
+				<script>
+				
+					(function($){
+					
+						$(".user-data").on("click",function(){
+						
+							$("#users-api-current").animate({opacity:0},300);
+				   
+							var id				= $(this).attr("data-id");
+							var username		= $(this).attr("data-username");
+							var full_name		= $(this).attr("data-full_name");
+							var profile_picture = $(this).attr("data-profile_picture");
+				  
+							$.ajax({
+								type: "POST",
+								url: "/wp-admin/admin-ajax.php?action=gdrwig_update_users_api_data",
+								data: {id:id,username:username,full_name:full_name,profile_picture:profile_picture}
+								}
+								
+							).done(function(data){
+							
+							$("#users-api-current img").attr("src",profile_picture);
+							$("#users-api-current a").attr("href","http://instagram.com/"+username);
+							$("#users-api-current a").text(username);
+							$("#users-api-current").animate({opacity:1},300);
+							
+							
+							$(".users-api-id").val(id);
+							$(".users-api-username").val(username);
+							$(".users-api-full_name").val(full_name);
+							$(".users-api-profile_picture").val(profile_picture);
+								
+							});
+				   
+				  		});
+					
+					})(jQuery);
+				
+				</script>
+				';
+				
+				
+				
+		   	
+		   	} elseif(isset($api->meta->error_message)) {
+			   	
+			   	$html = '<p><br>' . $api->meta->error_message . '</p>';
+		   	}
+		   	
+		   	
+		   	if(isset($api->data) && empty($api->data))
+		   	{
+			   	$html = '<p><br>No results found for <em>' . $q . '</em></p>
+			   	';
+		   	}
+		   	
+		   	echo $html;
+		   	
+		   	die();
+		   	
+	   	}
 	   	
 	   	
-		
+	   	
+	   	
+	   	public static function updateUsersApiData()
+	   	{
+		   	
+		   // Get current options.
+		   $opts = get_option('gdrwig_settings'); 
+		   
+		   // Add the data about the selected user to the mix.
+		   $opts['user']['id']				= $_POST['id'];
+		   $opts['user']['username']		= $_POST['username'];
+		   $opts['user']['full_name']		= $_POST['full_name'];
+		   $opts['user']['profile_picture']	= $_POST['profile_picture'];
+		   
+		   print_r('<pre>');
+		   print_r($opts);
+		   print_r('</pre>');
+		   
+		   
+		   // Update.
+		   update_option('gdrwig_settings',$opts);
 
+		   	die();
+	   	}
+	   	
+	   	
 
-			
 		
 	}
 
 // Add register iframe
 add_action( 'admin_menu', array('GdrwigFeeds','settingsMenu' ));
 add_action( 'admin_init', array('GdrwigFeeds','Init'));
+add_action('wp_ajax_gdrwig_search_users', array('GdrwigFeeds','searchUsers'));
+add_action('wp_ajax_gdrwig_update_users_api_data', array('GdrwigFeeds','updateUsersApiData'));
 add_action( 'admin_init', array('GdrwigFeeds','adminStyles'));
 add_action( 'admin_init', array('GdrwigFeeds','adminJs'));
 add_filter('plugin_action_links', 'GdrwigFeeds::actionLinks', 10, 2);

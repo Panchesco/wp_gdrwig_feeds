@@ -11,6 +11,7 @@
 	 */
 	 public static function thumbs($data,$resolution='thumbnail')
 	 {
+	 		$data = (is_array($data)) ? $data : array();
 
 	 		if( ! empty($data) && ! in_array($resolution,ResponseHtml::availableResolutions($data)))
 	 		{

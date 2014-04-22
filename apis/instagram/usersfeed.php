@@ -25,7 +25,10 @@
 			
 			function __construct($config=array())
 			{
-				
+				foreach($config as $key=>$row)
+				{
+					self::$$key = $row;
+				};
 
 			}
 			

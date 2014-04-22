@@ -33,14 +33,35 @@ class TagFeedWidget extends WP_Widget
 		
 		extract( $opts, EXTR_SKIP );
 
-		// Create TagFeed instance.
-		$feed = new TagFeed($client_id,$hashtag,$count);
+		switch ($feed)
+		{
 		
-		$response = $feed->response();
+		
+			case 'user':
+				// Create TagFeed instance.
+				
+				new UsersFeed(array('count'=>$opts['count']));
+				
+				$api = UsersFeed::mediaRecentClientId($client_id,$user['id']);
+				
+				$data = $api->data;
+				
+				
+			break;
+		
+			default:
+				// Create TagFeed instance.
+				$api = new TagFeed($client_id,$hashtag,$count);
+				$response = $api->response();
+				$data = $response->data;
+			break;
+		
+		
+		}
 		
 		?>
 
-		<div class="tag-feed"><?php echo ResponseHtml::thumbs($response->data,'standard_resolution'); ?></div>
+		<div class="tag-feed"><?php echo ResponseHtml::thumbs($data,'standard_resolution'); ?></div>
 
 		<?php
 		
@@ -50,20 +71,48 @@ class TagFeedWidget extends WP_Widget
 	function form( $instance )
 	{
 		$opts = get_option('gdrwig_settings');
-
-		
 		extract( $opts, EXTR_SKIP );
-
-		// Create TagFeed instance.
-		$feed = new TagFeed($client_id,$hashtag,$count);
 		
-		$response = $feed->response();
+		/* Some logic here for pulling the correct feed */
 		
+		print_r('<pre>');
+		print_r($opts);
+		print_r('</pre>');;
 		?>
 		<h4>Current Feed Result</h4>
 		<p>Update this configuration in <a href="<?php ;?>/wp-admin/options-general.php?page=gdrwig_settings">settings</a></p>
-		<div class="appearance widgets tag-feed clearfix"><?php echo ResponseHtml::thumbs($response->data,'standard_resolution'); ?></div>
+		<div class="appearance widgets tag-feed clearfix">
+		<?php
+		
+		switch ($feed)
+		{
+		
+		
+			case 'user':
+				// Create TagFeed instance.
+				
+				new UsersFeed(array('count'=>$opts['count']));
+				
+				$api = UsersFeed::mediaRecentClientId($client_id,$user['id']);
+				
+				
+				echo ResponseHtml::thumbs($api->data,'standard_resolution');
+				
+			break;
+		
+			default:
+				// Create TagFeed instance.
+				$api = new TagFeed($client_id,$hashtag,$count);
+				$response = $api->response();
+				echo ResponseHtml::thumbs($response->data,'standard_resolution');
+			break;
+		
+		
+		}
 
+		
+		?>
+		</div>
 		<?php
 	}
 
