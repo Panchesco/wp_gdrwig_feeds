@@ -60,9 +60,7 @@ if ( ! defined( 'WPINC' ) ) {
 						'resolution'=>'thumbnail',
 						'access_token'=>'',
 						'count'=>0));
-						
-						
-						
+								
 
 		}
 		
