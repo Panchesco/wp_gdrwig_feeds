@@ -71,15 +71,34 @@ class TagFeedWidget extends WP_Widget
 	function form( $instance )
 	{
 		$opts = get_option('gdrwig_settings');
+		$feeds = array('hashtag'=>'Hashtag','user'=>'User','popular'=>'Popular');
 		extract( $opts, EXTR_SKIP );
 		
 		/* Some logic here for pulling the correct feed */
 		
-		print_r('<pre>');
-		print_r($opts);
-		print_r('</pre>');;
+		
 		?>
 		<h4>Current Feed Result</h4>
+		
+		<p>Selected Feed: <?php echo $feeds[$opts[feed]];?></p>
+		
+		<?php 
+		
+		if($opts[feed]=='user')
+		{ ?>
+			
+		<div class="thumb">
+			<p><img src="<?php echo $opts[user][profile_picture] ;?>"></p>
+			<p>Selected User: <a target="_blank" href="http://instagram.com/<?php echo $opts[user][username] ;?>"><?php echo $opts[user][username] ;?></a></p>
+		</div>
+			
+		<?php 
+		
+		}
+		
+		
+		?>
+		
 		<p>Update this configuration in <a href="<?php ;?>/wp-admin/options-general.php?page=gdrwig_settings">settings</a></p>
 		<div class="appearance widgets tag-feed clearfix">
 		<?php

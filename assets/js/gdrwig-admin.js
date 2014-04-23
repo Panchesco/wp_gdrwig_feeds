@@ -93,10 +93,48 @@
 				  		
 
 
+				  		
+				  		
+				  		/* Add some classes to the default WP API Settings page table rows */
+				  		$('.form-table input,.form-table textarea,.form-table select,.form-table email').each(function(){
+					  		
+					  		 var n = $(this).attr('name');
+					  		 
+					  		 
+					  		 if( n != undefined)
+					  		 {
+					  		 
+					  		 	n = n.replace('gdrwig_settings[','');
+					  		 	n = n.replace(']','');
+					  		 	
+					  		 	$(this).closest('tr').addClass(n);
+
+					  		 }
+
+				  		});
+				  		
+				  		
+				  		/* Show or hide ig_user_to_show depending on the selected feed */
+				  		toggleSelectedUser = function()
+				  		{
+				  		
+				  			if($("[id='gdrwig_settings[feed]']").val()=='user')
+				  			{
+					  			$('.ig_user_to_show').fadeIn();
+					  		} else {
+						  		
+						  		$('.ig_user_to_show').fadeOut();
+					  		}
+
+				  		}
+				  		
 			   
 				  		liveSearch();
 				  		
-			   
+				  		toggleSelectedUser();
+				  		$("[id='gdrwig_settings[feed]']").change(function(){
+					  		toggleSelectedUser();
+				  		});
 			   
 		
 			

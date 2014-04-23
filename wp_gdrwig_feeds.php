@@ -150,7 +150,7 @@ if ( ! defined( 'WPINC' ) ) {
 		    add_settings_field(
 
 		    'ig_user_to_show',
-		       'Which User?',
+		       '<span id="user-select">Which User?</span>',
 		       'GdrwigFeeds::ig_user_to_show_input',
 		       'gdrwig_settings',
 		    /*5*/   'gdrwig_settings_section_2'
