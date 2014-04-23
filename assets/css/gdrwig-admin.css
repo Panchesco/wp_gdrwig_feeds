@@ -1,0 +1,56 @@
+		    	
+		    	
+		    	
+		    	
+		    	
+		    	.thumbs-wrapper .thumb
+		    	{
+		    		float: left;
+		    	}
+		    	
+		    	
+		    	.appearance.widgets.tag-feed .thumb
+		    	{
+			    	float:left;
+			    	margin: 0 10px 10px 0;
+		    	}
+		    	
+		    	.appearance.widgets.tag-feed .thumb img
+		    	{
+			    	
+			    	max-width: 90px;
+			    	display: block;
+		    	}
+		    	
+		    	
+		    	
+		    	
+		    	.wrap 
+		    	{
+			    	
+			    	
+		    	}
+		    	
+		    	
+		    	
+		    	ul.users-search li
+		    	{
+			    	
+			    	margin: 0 8px 0 8px;
+			    	
+		    	}
+		    	
+		    	ul.users-search li ul.profile
+		    	{
+			    	
+			    	height: 230px;
+			    	float: left;
+			    	margin: 0 10px 10px 0;
+		    	}
+		    	
+		    	#user-search-results ul ul
+				{
+			   
+			   float: left;
+			   margin: 0 10px 10px 0;
+			   }

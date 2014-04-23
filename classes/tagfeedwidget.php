@@ -5,7 +5,7 @@ if ( ! defined( 'WPINC' ) ) {
 	die;
 } 
 
-class GdrwigTagFeedWidget extends WP_Widget
+class TagFeedWidget extends WP_Widget
 {
 
 
@@ -17,59 +17,123 @@ class GdrwigTagFeedWidget extends WP_Widget
 		);
 		
 		parent::WP_Widget('gdrwid_tag_feed_widget','Tag Feed Widget',$widget_options);
+		
+		// Register the stylesheet.
+		wp_register_style( 'gdrwigStylesheet', plugins_url('wp_gdrwig_feeds/assets/css/gdrwig-admin.css') );
 	}
 	
 	
 	
 	function widget($args,$instance)
 	{
-		
-		extract( $args, EXTR_SKIP );
-		$client_id	= ( $instance['client_id'] ) ? $instance['client_id'] : '';
-		$hashtag	= ( $instance['hashtag'] ) ? $instance['hashtag'] : '';
-		$response_count		= ( $instance['response_count'] ) ? $instance['response_count'] : 0;
-		
+	
+
+		$opts = get_option('gdrwig_settings');
 
 		
-		// Create TagFeed instance.
-		$feed = new TagFeed($instance['client_id'],$instance['hashtag'],$instance['response_count']);
+		extract( $opts, EXTR_SKIP );
+
+		switch ($feed)
+		{
 		
-		$response = $feed->response();
+		
+			case 'user':
+				// Create TagFeed instance.
+				
+				new UsersFeed(array('count'=>$opts['count']));
+				
+				$api = UsersFeed::mediaRecentClientId($client_id,$user['id']);
+				
+				$data = $api->data;
+				
+				
+			break;
+		
+			default:
+				// Create TagFeed instance.
+				$api = new TagFeed($client_id,$hashtag,$count);
+				$response = $api->response();
+				$data = $response->data;
+			break;
+		
+		
+		}
 		
 		?>
 
-		<div class="tag-feed"><?php echo ResponseHtml::thumbs($response->data,'standard_resolution'); ?></div>
-		<?php echo ResponseHtml::paginationButton($response); ?>
+		<div class="tag-feed"><?php echo ResponseHtml::thumbs($data,'standard_resolution'); ?></div>
 
 		<?php
 		
 	}
-		
+	
 	
 	function form( $instance )
 	{
-		?>
-		<p>Enter your Instagram provided <a target="_blank" href="http://instagram.com/developer/clients/manage/">Client ID</a>, a tag, and the number of images to return with each request.</p>
+		$opts = get_option('gdrwig_settings');
+		extract( $opts, EXTR_SKIP );
 		
-		<p>
-		<label for="<?php echo $this->get_field_id('client_id');?>">
-		Client ID:<br>
-		<input id="<?php echo $this->get_field_id('client_id');?>" name="<?php echo $this->get_field_name('client_id');?>" value="<?php echo esc_attr($instance['client_id']);?>" />
-		</label>
-		</p>
-		<p>
-		<label for="<?php echo $this->get_field_id('hashtag');?>">
-		Hashtag:<br>
-		<input id="<?php echo $this->get_field_id('hashtag');?>" name="<?php echo $this->get_field_name('hashtag');?>" value="<?php echo esc_attr($instance['hashtag']);?>" />
-		</label>
-		</p>
-		<p>
-		<label for="<?php echo $this->get_field_id('count');?>">
-		Count (30 max):<br>
-		<input id="<?php echo $this->get_field_id('response_count');?>" name="<?php echo $this->get_field_name('response_count');?>" value="<?php echo esc_attr($instance['response_count']);?>" />
-		</label>
-		</p>
+		/* Some logic here for pulling the correct feed */
+		
+		print_r('<pre>');
+		print_r($opts);
+		print_r('</pre>');;
+		?>
+		<h4>Current Feed Result</h4>
+		<p>Update this configuration in <a href="<?php ;?>/wp-admin/options-general.php?page=gdrwig_settings">settings</a></p>
+		<div class="appearance widgets tag-feed clearfix">
+		<?php
+		
+		switch ($feed)
+		{
+		
+		
+			case 'user':
+				// Create TagFeed instance.
+				
+				new UsersFeed(array('count'=>$opts['count']));
+				
+				$api = UsersFeed::mediaRecentClientId($client_id,$user['id']);
+				
+				
+				echo ResponseHtml::thumbs($api->data,'standard_resolution');
+				
+			break;
+		
+			default:
+				// Create TagFeed instance.
+				$api = new TagFeed($client_id,$hashtag,$count);
+				$response = $api->response();
+				echo ResponseHtml::thumbs($response->data,'standard_resolution');
+			break;
+		
+		
+		}
+
+		
+		?>
+		</div>
 		<?php
 	}
 
+
+	public static function register()
+	{
+		register_widget('TagFeedWidget');
+		
+	}
+	
+	
+		public static function adminStyles() 
+		{
+       /*
+        * It will be called only on your plugin admin page, enqueue our stylesheet here
+        */
+			wp_enqueue_style( 'gdrwigStylesheet' );
+	   	}
+
 }
+
+
+add_action('widgets_init',array('TagFeedWidget','register'));
+//add_action( 'admin_init', array('TagFeedWidget','adminStyles'));
