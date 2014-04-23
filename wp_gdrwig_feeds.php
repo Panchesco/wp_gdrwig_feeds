@@ -397,10 +397,10 @@ if ( ! defined( 'WPINC' ) ) {
 
 				     
 				     <input type="hidden" name="gdrwig_settings[access_token]" id="gdrwig_settings[access_token]" value="<?php echo $opts['access_token'];?>">
-				     <input type="hidden" class="users-api-id" name="gdrwig_settings[user][id]" id="gdrwig_settings[user][id]" value="<?php echo $opts['user']['id'];?>">
-				     <input type="hidden" class="users-api-username" name="gdrwig_settings[user][username]" id="gdrwig_settings[user][username]" value="<?php echo $opts['user']['username'];?>">
-				     <input type="hidden" class="users-api-full_name" name="gdrwig_settings[user][full_name]" id="gdrwig_settings[user][full_name]" value="<?php echo $opts['user']['full_name'];?>">
-				     <input type="hidden" class="users-api-profile_picture"name="gdrwig_settings[user][profile_picture]" id="gdrwig_settings[user][profile_picture]" value="<?php echo $opts['user']['profile_picture'];?>">
+				     <input type="hidden" name="gdrwig_settings[user][id]" id="gdrwig_settings[user][id]" value="<?php echo $opts['user']['id'];?>">
+				     <input type="hidden" name="gdrwig_settings[user][username]" id="gdrwig_settings[user][username]" value="<?php echo $opts['user']['username'];?>">
+				     <input type="hidden" name="gdrwig_settings[user][full_name]" id="gdrwig_settings[user][full_name]" value="<?php echo $opts['user']['full_name'];?>">
+				     <input type="hidden" name="gdrwig_settings[user][profile_picture]" id="gdrwig_settings[user][profile_picture]" value="<?php echo $opts['user']['profile_picture'];?>">
 
 				 
 				      <?php

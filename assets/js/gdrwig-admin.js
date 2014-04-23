@@ -80,11 +80,11 @@
 								$("#users-api-current").animate({opacity:1},300);
 								
 								
-								$(".users-api-id").val(id);
-								$(".users-api-username").val(username);
-								$(".users-api-full_name").val(full_name);
-								$(".users-api-profile_picture").val(profile_picture);
-									
+								$("[id='gdrwig_settings[user][id]']").val(id);
+								$("[id='gdrwig_settings[user][username]']").val(username);
+								$("[id='gdrwig_settings[user][full_name]']").val(full_name);
+								$("[id='gdrwig_settings[user][profile_picture]']").val(profile_picture);
+
 								});
 					   
 					  		}); 
@@ -92,8 +92,6 @@
 				  		}
 				  		
 
-
-				  		
 				  		
 				  		/* Add some classes to the default WP API Settings page table rows */
 				  		$('.form-table input,.form-table textarea,.form-table select,.form-table email').each(function(){
