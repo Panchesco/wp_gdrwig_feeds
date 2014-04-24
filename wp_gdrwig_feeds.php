@@ -140,7 +140,7 @@ if ( ! defined( 'WPINC' ) ) {
 			    /** Setting section 2. **/
 			    add_settings_section(
 			       'gdrwig_settings_section_2',
-			       '2. Instagram Client App Settings',
+			       '2. Instagram Feed Settings',
 			       '',
 			       'gdrwig_settings'
 			    );
