@@ -171,7 +171,7 @@ if ( ! defined( 'WPINC' ) ) {
 			    add_settings_field(
 	
 			    'hashtag',
-			       'Preferred Hashtag',
+			       'Which Hashtag?',
 			       'GdrwigFeeds::hashtag_input',
 			       'gdrwig_settings',
 				   'gdrwig_settings_section_2'
