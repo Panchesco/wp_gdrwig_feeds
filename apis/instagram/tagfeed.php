@@ -35,7 +35,7 @@
 						if(empty($id))
 						{
 						
-							exit('You need a Client ID. You can get one at <a href="http://instagram.com/developer">http://instagram.com/developer</a>');
+							exit('<p>You need a Client ID. You can get one at <a href="http://instagram.com/developer">http://instagram.com/developer</a></p>');
 							
 						}
 					}
@@ -45,14 +45,14 @@
 					// If there's no tag, exit.
 					if(false === $tag || empty($tag))
 					{
-						exit('You need to include the tag parameter.');
+						exit('<p>You need to include the hashtag parameter. Log into the admin area and update the settings.</p>');
 					}
 					
 					
 					// If there's no tag, exit.
 					if(0 == $count)
 					{
-						exit('You\'re requesting zero results.');
+						exit('<p>You\'re requesting zero results.</p>');
 					}
 					
 					// Set some default properties.
@@ -165,7 +165,7 @@
 				 
 				 
 				 /**
-				   * Get information about current tag object returned as json string.
+				   * Get information about current tag object.
 				   * @return string
 				   */
 				   public function tagData()
@@ -177,7 +177,7 @@
 				   			$response = CurlHelper::getCurl($endpoint);
 				   			
 
-				   		return $response;
+				   		return json_decode($response);
 				   		
 				   }
 

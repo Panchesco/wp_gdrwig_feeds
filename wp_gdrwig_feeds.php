@@ -39,6 +39,7 @@ if ( ! defined( 'WPINC' ) ) {
 	require_once(__DIR__ . '/apis/instagram/responsehtml.php');
 	require_once(__DIR__ . '/apis/instagram/tagfeed.php');
 	require_once(__DIR__ . '/apis/instagram/usersfeed.php');
+	require_once(__DIR__ . '/apis/instagram/clientinfo.php');
 	require_once(__DIR__ . '/classes/tagfeedwidget.php');
 
 
@@ -76,22 +77,19 @@ if ( ! defined( 'WPINC' ) ) {
 				GdrwigFeeds::accessTokenCurl($_GET['code']);
 			}
 			
-		 
+			
+			// Get the current options.
+			$opts = get_option('gdrwig_settings');
+
 		     /** Setting section 1. **/
 		    add_settings_section(
 		       'gdrwig_settings_section_1',
-		       'Instagram Client Info',
+		       '1. Instagram Client Info',
 		       '',
 		       'gdrwig_settings'
 		    );
 		    
-		     /** Setting section 2. **/
-		    add_settings_section(
-		       'gdrwig_settings_section_2',
-		       'Instagram Client App Settings',
-		       '',
-		       'gdrwig_settings'
-		    );
+		     
 		    
 		    
 		    
@@ -135,57 +133,71 @@ if ( ! defined( 'WPINC' ) ) {
 		    );
 		    
 		    
-		    // Feed
-		    add_settings_field(
-
-		    'feed',
-		       'Which Feed?',
-		       'GdrwigFeeds::feed_dropdown',
-		       'gdrwig_settings',
-
-		    /*5*/   'gdrwig_settings_section_2'
-		    );
+		    // We only want this next section if the user has registered client with Instagram.
+		    if(self::clientInfoValid($opts))
+		    {
 		    
-		    // Ig user to show
-		    add_settings_field(
-
-		    'ig_user_to_show',
-		       '<span id="user-select">Which User?</span>',
-		       'GdrwigFeeds::ig_user_to_show_input',
-		       'gdrwig_settings',
-		    /*5*/   'gdrwig_settings_section_2'
-		    );
+			    /** Setting section 2. **/
+			    add_settings_section(
+			       'gdrwig_settings_section_2',
+			       '2. Instagram Client App Settings',
+			       '',
+			       'gdrwig_settings'
+			    );
+			    
+			    
+			    // Feed
+			    add_settings_field(
+	
+			    'feed',
+			       'Which Feed?',
+			       'GdrwigFeeds::feed_dropdown',
+			       'gdrwig_settings',
+				   'gdrwig_settings_section_2'
+			    );
+			    
+			    // Ig user to show
+			    add_settings_field(
+	
+			    'ig_user_to_show',
+			       '<span id="user-select">Which User?</span>',
+			       'GdrwigFeeds::ig_user_to_show_input',
+			       'gdrwig_settings',
+			       'gdrwig_settings_section_2'
+			    );
+			    
+			    
+			    // Hashtag.
+			    add_settings_field(
+	
+			    'hashtag',
+			       'Preferred Hashtag',
+			       'GdrwigFeeds::hashtag_input',
+			       'gdrwig_settings',
+				   'gdrwig_settings_section_2'
+			    );
+			    
+			    // Image resolution.
+			    add_settings_field(
+	
+			       'resolution',
+			       'Resolution',
+			       'GdrwigFeeds::resolution_dropdown',
+			       'gdrwig_settings',
+			       'gdrwig_settings_section_2'
+			    );
+			    
+			    
+			    // Count.
+			    add_settings_field(
+			       'count',
+			       'Count (20 Max)',
+			       'GdrwigFeeds::count_input',
+			       'gdrwig_settings',
+				   'gdrwig_settings_section_2'
+			    );
 		    
-		    
-		    // Hashtag.
-		    add_settings_field(
-
-		    'hashtag',
-		       'Preferred Hashtag',
-		       'GdrwigFeeds::hashtag_input',
-		       'gdrwig_settings',
-			   'gdrwig_settings_section_2'
-		    );
-		    
-		    // Image resolution.
-		    add_settings_field(
-
-		       'resolution',
-		       'Resolution',
-		       'GdrwigFeeds::resolution_dropdown',
-		       'gdrwig_settings',
-		       'gdrwig_settings_section_2'
-		    );
-		    
-		    
-		    // Count.
-		    add_settings_field(
-		       'count',
-		       'Count (20 Max)',
-		       'GdrwigFeeds::count_input',
-		       'gdrwig_settings',
-			   'gdrwig_settings_section_2'
-		    );
+		    }
 		    
 
 		 
@@ -427,10 +439,14 @@ if ( ! defined( 'WPINC' ) ) {
 				 
 				      // Submit button.
 				      submit_button();
+				      
+				      
+				      if(ClientInfo::validClientId($opts['client_id']))
+				      {
 				       
 				      ?>
 				      
-				      <h3>Instagram Authentication</h3>
+				      <h3>3. Instagram Authentication</h3>
 				      
 				      <?php if(false === UsersFeed::accessTokenValid($opts['access_token'])) {?>
 				     <div id="ig-auth">
@@ -453,6 +469,19 @@ if ( ! defined( 'WPINC' ) ) {
 
 			</div><!-- /.wrap -->
 		    <?php
+		    
+		    		} else {
+			    	
+			 ?>	
+			    		
+			    	<p>It looks like you need to update your <a target="_blank" href="http://instagram.com/developer/clients/manage/">Instagram client info</a>.</p>
+			    	<ul>
+			    		<li>Website url: <?php echo '';?></li>
+			    		<li>Redirect uri: <?php echo '';?></li>
+			    	</ul>
+			    		
+		    <?php
+		    		}
 
 		}
 		
@@ -610,7 +639,39 @@ if ( ! defined( 'WPINC' ) ) {
 	   	}
 	   	
 	   	
+	   	/**
+	   	 * Check that current client info is valid.
+	   	 * @param $client_info = array
+	   	 * @return boolean
+	   	 */
+	   	 public static function clientInfoValid($client_info)
+	   	 {
+		   
+		   
+		   	$keys = array('client_id','client_secret','redirect_uri');
+		   	
+		   	foreach($keys as $key)
+		   	{
 
+			   	// Let's check the passed client_info param against the items we need for IG.
+			   	if( ! in_array($key,array_keys($client_info)))
+			   	{
+				   	return false;
+			   	}
+			   	
+			   	// Make sure the setting isn't empty.
+			   	if( null == $client_info[$key] )
+			   	{
+				   	return false;
+			   	}
+
+		   	}
+		   	 
+		   	 
+		   	 // Call Instagram and check that the client_id is correct.
+		   	 return ClientInfo::validClientId($client_info['client_id']);
+
+	   	 }
 		
 	}
 
