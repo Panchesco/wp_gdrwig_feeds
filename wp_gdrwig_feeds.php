@@ -84,7 +84,7 @@ if ( ! defined( 'WPINC' ) ) {
 		     /** Setting section 1. **/
 		    add_settings_section(
 		       'gdrwig_settings_section_1',
-		       '1. Instagram Client Info',
+		       '1. Add/Update Your Instagram Client Info',
 		       '',
 		       'gdrwig_settings'
 		    );
@@ -122,7 +122,8 @@ if ( ! defined( 'WPINC' ) ) {
 			   'gdrwig_settings_section_1'
 		    );
 		    
-		    // Client Secret.
+		    // Redirect URI.
+		    /*
 		    add_settings_field(
 
 		       'redirect_uri',
@@ -131,16 +132,22 @@ if ( ! defined( 'WPINC' ) ) {
 		       'gdrwig_settings',
 			   'gdrwig_settings_section_1'
 		    );
+		    */
 		    
 		    
-		    // We only want this next section if the user has registered client with Instagram.
-		    if(self::clientInfoValid($opts))
-		    {
-		    
-			    /** Setting section 2. **/
+		    	/** Setting section 2. **/
 			    add_settings_section(
 			       'gdrwig_settings_section_2',
-			       '2. Instagram Feed Settings',
+			       '2. Instagram Authentication',
+			       'GdrwigFeeds::authenticationSection',
+			       'gdrwig_settings'
+			    );
+		    
+
+			    /** Setting section 3. **/
+			    add_settings_section(
+			       'gdrwig_settings_section_3',
+			       '3. Instagram Feed Settings',
 			       '',
 			       'gdrwig_settings'
 			    );
@@ -153,7 +160,7 @@ if ( ! defined( 'WPINC' ) ) {
 			       'Which Feed?',
 			       'GdrwigFeeds::feed_dropdown',
 			       'gdrwig_settings',
-				   'gdrwig_settings_section_2'
+				   'gdrwig_settings_section_3'
 			    );
 			    
 			    // Ig user to show
@@ -163,7 +170,7 @@ if ( ! defined( 'WPINC' ) ) {
 			       '<span id="user-select">Which User?</span>',
 			       'GdrwigFeeds::ig_user_to_show_input',
 			       'gdrwig_settings',
-			       'gdrwig_settings_section_2'
+			       'gdrwig_settings_section_3'
 			    );
 			    
 			    
@@ -174,7 +181,7 @@ if ( ! defined( 'WPINC' ) ) {
 			       'Which Hashtag?',
 			       'GdrwigFeeds::hashtag_input',
 			       'gdrwig_settings',
-				   'gdrwig_settings_section_2'
+				   'gdrwig_settings_section_3'
 			    );
 			    
 			    // Image resolution.
@@ -184,7 +191,7 @@ if ( ! defined( 'WPINC' ) ) {
 			       'Resolution',
 			       'GdrwigFeeds::resolution_dropdown',
 			       'gdrwig_settings',
-			       'gdrwig_settings_section_2'
+			       'gdrwig_settings_section_3'
 			    );
 			    
 			    
@@ -194,10 +201,10 @@ if ( ! defined( 'WPINC' ) ) {
 			       'Count (20 Max)',
 			       'GdrwigFeeds::count_input',
 			       'gdrwig_settings',
-				   'gdrwig_settings_section_2'
+				   'gdrwig_settings_section_3'
 			    );
 		    
-		    }
+
 		    
 
 		 
@@ -223,18 +230,17 @@ if ( ! defined( 'WPINC' ) ) {
 			 $opts = get_option('gdrwig_settings');
 			 
 			 
-			 
-			 
 			 $url	= 'https://api.instagram.com/oauth/access_token';
 			 
 			 $fields['client_id']			= urlencode($opts['client_id']);
 			 $fields['client_secret']		= urlencode($opts['client_secret']);
 			 $fields['grant_type']			= 'authorization_code';
-			 $fields['redirect_uri']		= urlencode($opts['redirect_uri']);
+			 $fields['redirect_uri']		= urlencode(site_url('wp-admin/options-general.php?page=gdrwig_settings'));
 			 $fields['code']				= urlencode($code);
 			 
 			 
 			 $response = json_decode(CurlHelper::postCurl($url,$fields));
+			 
 			 
 			 if(isset($response->access_token))
 			 {
@@ -245,7 +251,7 @@ if ( ! defined( 'WPINC' ) ) {
 				 $opts['user']['profile_picture']	= $response->user->profile_picture;
 
 				 update_option('gdrwig_settings',$opts);
-				 wp_redirect($opts['redirect_uri']); exit;
+				 wp_redirect(site_url('wp-admin/options-general.php?page=gdrwig_settings')); exit;
 			 	
 			 	} else {
 				 
@@ -403,7 +409,23 @@ if ( ! defined( 'WPINC' ) ) {
 		    <div class="wrap">
 				 	
 				     <h2>GDRWIG</h2>
-				     <p>Some text describing what the plugin settings do.</p>
+				     <p>To get your feed going, you'll need to do a few things first to get your website connected to Instagram.</p>
+				     <ol>
+				     	<li>Register your "client" (this plug-in) with Instagram:<br>
+				     		Open a web browser, log into your Instagram account and navigate to the <a href="http://instagram.com/developer/clients/manage/">manage clients</a> area.<br>
+				     	Click on the "Register a New Client" button. Follow the instructions on the page. Use the following values for the "Website" and "OAuth redirect_uri" fields:
+				     		<ul>
+				     			<li>Website:<br><input type="text" value="<?php echo site_url();?>"></li>
+				     			<li>OAuth redirect_uri:<br><input type="text" value="<?php echo site_url('wp-admin/options-general.php?page=gdrwig_settings');?>"><br>
+				     			Once you've registered the client, copy and paste the CLIENT ID and CLIENT SECRET values onto this page.
+				     			</li>
+				     		</ul>
+					 			
+					 	</li>
+				     	<li></li>
+				     	<li></li>
+				     </ol>
+				     	
 				      
 				     <form method="post" action="options.php">
 
@@ -441,48 +463,41 @@ if ( ! defined( 'WPINC' ) ) {
 				      submit_button();
 				      
 				      
-				      if(ClientInfo::validClientId($opts['client_id']))
-				      {
-				       
-				      ?>
-				      
-				      <h3>3. Instagram Authentication</h3>
-				      
-				      <?php if(false === UsersFeed::accessTokenValid($opts['access_token'])) {?>
-				     <div id="ig-auth">
+
+			    		
+		   
+		    		
+		}
+		
+		public static function authenticationSection()
+		{
+		
+			$opts = get_option('gdrwig_settings');
+			
+			if( false === UsersFeed::accessTokenValid($opts['access_token']) )
+			{
+			
+			?>
+			
+			<div id="ig-auth">
 				     <p>It looks like you need to re/authorize this application.<br /> 
-				     <a href="https://api.instagram.com/oauth/authorize/?client_id=<?php echo $opts['client_id'] ;?>&redirect_uri=<?php echo $opts['redirect_uri'] ;?>&response_type=code">Authorize on Instagram</a></p></div>
-
-				     <?php } else { ?>
-				     
-				     <p>Your authorization is current.</p>
-				     
-				     <?php } ?>
-				     
-				     
-				    <div class="thumbs-wrapper">
-				    
-				    </div><!-- /.thumbs-wrapper -->
-				 
-				     </form>
-				     
-
-			</div><!-- /.wrap -->
-		    <?php
-		    
-		    		} else {
-			    	
-			 ?>	
-			    		
-			    	<p>It looks like you need to update your <a target="_blank" href="http://instagram.com/developer/clients/manage/">Instagram client info</a>.</p>
-			    	<ul>
-			    		<li>Website url: <?php echo '';?></li>
-			    		<li>Redirect uri: <?php echo '';?></li>
-			    	</ul>
-			    		
-		    <?php
-		    		}
-
+				     <a href="https://api.instagram.com/oauth/authorize/?client_id=<?php echo $opts['client_id'] ;?>&redirect_uri=<?php echo site_url('wp-admin/options-general.php?page=gdrwig_settings&response_type=code');?>">Authorize on Instagram</a></p>
+			</div><!-- /#ig-auth -->
+			
+			<?php
+			
+			} else {
+			
+			?>
+			
+			 <p>Your authorization is current.</p>
+			
+			<?php
+			
+			}
+			
+			echo '<hr>';
+			
 		}
 		
 		
@@ -646,9 +661,8 @@ if ( ! defined( 'WPINC' ) ) {
 	   	 */
 	   	 public static function clientInfoValid($client_info)
 	   	 {
-		   
-		   
-		   	$keys = array('client_id','client_secret','redirect_uri');
+	   	 
+		   	$keys = array('client_id','client_secret');
 		   	
 		   	foreach($keys as $key)
 		   	{
@@ -666,6 +680,9 @@ if ( ! defined( 'WPINC' ) ) {
 			   	}
 
 		   	}
+		   	
+		   	
+		   	
 		   	 
 		   	 
 		   	 // Call Instagram and check that the client_id is correct.
