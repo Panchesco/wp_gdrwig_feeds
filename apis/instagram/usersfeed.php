@@ -12,16 +12,12 @@
 
 			class UsersFeed {
 			
-			public $client_id;
-			public $user_id;
-			public $access_token;
-			public $q;
-			public static $count = 1;
-			public $min_id;
-			public $max_id;
-			public $min_timestamp;
-			public $max_timestamp;
-			public $endpoint;
+				public static $client_id;
+				public static $id;
+				public static $access_token;
+				public static $q;
+				public static $count = 1;
+				public static $endpoint = false;
 			
 			function __construct($config=array())
 			{
@@ -65,10 +61,10 @@
 			  * @param $id integer
 			  * @return object
 			  */
-			  public static function userId($access_token,$id)
+			  public static function userId()
 			  {
 				  
-				  	$endpoint = 'https://api.instagram.com/v1/users/' . $id . '/?access_token=' . $access_token;
+				  	$endpoint = 'https://api.instagram.com/v1/users/' . self::$id . '/?access_token=' . self::$access_token;
 				  
 				 return json_decode(CurlHelper::getCurl($endpoint));
 
@@ -82,16 +78,13 @@
 			  * @param $access_token string
 			  * @return object
 			  */
-			  public static function selfFeed($access_token)
+			  public static function selfFeed()
 			  {
 				  
-				  $endpoint = 'https://api.instagram.com/v1/users/self/feed?access_token=' . $access_token . '&count=' . self::$count;
-				  
-				  echo $access_token;
+				  $endpoint = 'https://api.instagram.com/v1/users/self/feed?access_token=' . self::$access_token . '&count=' . self::$count;
 				  
 				  return json_decode(CurlHelper::getCurl($endpoint));
 
-				  
 			  }
 			  
 			  
@@ -102,10 +95,10 @@
 			  * @param $id integer
 			  * @return object
 			  */
-			  public static function mediaRecent($access_token,$id)
+			  public static function mediaRecent()
 			  {
 				  
-				  	$endpoint = 'https://api.instagram.com/v1/users/' . $id . '/media/recent/?access_token=' . $access_token . '&count=' . self::$count;
+				  	$endpoint = 'https://api.instagram.com/v1/users/' . self::$id . '/media/recent/?access_token=' . self::$access_token . '&count=' . self::$count;
 				  
 				 return json_decode(CurlHelper::getCurl($endpoint));
 
@@ -120,10 +113,10 @@
 			  * @param $id integer
 			  * @return object
 			  */
-			  public static function mediaRecentClientId($client_id,$id)
+			  public static function mediaRecentClientId()
 			  {
 				  
-				  	$endpoint = 'https://api.instagram.com/v1/users/' . $id . '/media/recent/?client_id=' . $client_id . '&count=' . self::$count;
+				  	$endpoint = ( self::$endpoint === false ) ? 'https://api.instagram.com/v1/users/' . self::$id . '/media/recent/?client_id=' . self::$client_id . '&count=' . self::$count : self::$endpoint;
 				  
 				 return json_decode(CurlHelper::getCurl($endpoint));
 
@@ -138,10 +131,10 @@
 			  * @param $q string
 			  * @return array
 			  */
-			  public static function search($access_token,$q)
+			  public static function search()
 			  {
 				  
-				  	$endpoint = 'https://api.instagram.com/v1/users/search?q=' . $q . '&access_token=' . $access_token . '&count=' . self::$count;
+				  	$endpoint = 'https://api.instagram.com/v1/users/search?q=' . self::$q . '&access_token=' . self::$access_token . '&count=' . self::$count;
 				  
 				 return json_decode(CurlHelper::getCurl($endpoint));
 

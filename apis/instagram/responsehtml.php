@@ -6,12 +6,22 @@
 	
 	/**
 	 * Return formatted html for response thumbnails.
-	 * @param $data array - image data array
+	 * @param $response object returned from IG api
 	 * @return string
 	 */
-	 public static function thumbs($data,$resolution='thumbnail')
+	 public static function thumbs($response,$resolution='thumbnail')
 	 {
-	 		$data = (is_array($data)) ? $data : array();
+	 		// If IG returned an error, return that as our string.
+	 		if(isset($response->meta->error_message))
+	 		{
+		 		
+		 		return $response->meta->error_message;
+		 		
+	 		}
+	 		
+	 		
+	 		// Get images data array from response.
+	 		$data = (is_array($response->data)) ? $response->data : array();
 
 	 		if( ! empty($data) && ! in_array($resolution,ResponseHtml::availableResolutions($data)))
 	 		{
@@ -46,7 +56,17 @@
 			$i++;
 			
 		 	}
+		 	
 
+		 	// If  more results are available, create a Show more link.
+		 	if(isset($response->pagination->next_url))
+		 	{
+			 	
+			 	$html.= '
+			 	<a id="next_url" href="' . $response->pagination->next_url . '">Show more</a>
+			 	';
+			 	
+		 	}
 		 	
 		 	return $html;
 

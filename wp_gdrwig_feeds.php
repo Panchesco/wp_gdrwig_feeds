@@ -24,10 +24,6 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 */
-
-
-
-
 // If this file is called directly, abort.
 if ( ! defined( 'WPINC' ) ) {
 	die;
@@ -505,10 +501,13 @@ if ( ! defined( 'WPINC' ) ) {
 		{
 
 					$opts = get_option('gdrwig_settings');
-			
-					$feed = new TagFeed($opts['client_id'],$opts['hashtag'],$opts['count']);
+					extract($opts,EXTR_SKIP);
 					
-				return ResponseHtml::thumbs($feed->response()->data,$opts['resolution']);
+					$config = array('client_id'=>$client_id,'hashtag'=>$hashtag,'count'=>$count);
+								
+					$api = new TagFeed($config);
+					
+				return ResponseHtml::thumbs($api::response(),$resolution);
 			
 		}
 		
@@ -516,7 +515,7 @@ if ( ! defined( 'WPINC' ) ) {
 		public static function thumbs($response,$resolution)
 		{
 			
-			return ResponseHtml::thumbs($response->data,$resolution);
+			return ResponseHtml::thumbs($response,$resolution);
 			
 		}
 		
@@ -567,14 +566,25 @@ if ( ! defined( 'WPINC' ) ) {
 	   	public static function searchUsers()
 	   	{
 		   	$opts = get_option('gdrwig_settings'); 
+		   	extract($opts,EXTR_SKIP);
 		   	
 		   	$q = addslashes($_POST['q']);
 		   	
-		   	new UsersFeed(array('count'=>'15'));
-		   	$api = UsersFeed::search($opts['access_token'],$q);
+		   	$config = array(
+		   					'client_id'		=> $client_id,
+		   					'id'			=> $user['id'],
+		   					'access_token'	=> $access_token,
+		   					'count'			=> $count,
+		   					'q'				=> $q
+		   					);
+		   	
+		   	$api	= new UsersFeed($config);
 		   	
 		   	
-		   	if(isset($api->meta->code) && $api->meta->code==200)
+		   	$response = $api::search($access_token,$q);
+		   	
+		   	
+		   	if(isset($response->meta->code) && $response->meta->code==200)
 		   	{
 		   	
 		   		
@@ -584,7 +594,7 @@ if ( ! defined( 'WPINC' ) ) {
 		   				';
 		   				
 			   	
-				foreach($api->data as $key=>$row)
+				foreach($response->data as $key=>$row)
 				{
 					
 					$selected = ($row->id==$opts[user][id]) ? " checked" : "";
@@ -614,13 +624,13 @@ if ( ! defined( 'WPINC' ) ) {
 				';
 
 		   	
-		   	} elseif(isset($api->meta->error_message)) {
+		   	} elseif(isset($response->meta->error_message)) {
 			   	
 			   	$html = '<p><br>' . $api->meta->error_message . '</p>';
 		   	}
 		   	
 		   	
-		   	if(isset($api->data) && empty($api->data))
+		   	if(isset($response->data) && empty($response->data))
 		   	{
 			   	$html = '<p><br>No results found for <em>' . $q . '</em></p>
 			   	';
@@ -631,8 +641,6 @@ if ( ! defined( 'WPINC' ) ) {
 		   	die();
 		   	
 	   	}
-	   	
-	   	
 	   	
 	   	
 	   	public static function updateUsersApiData()
@@ -681,14 +689,62 @@ if ( ! defined( 'WPINC' ) ) {
 
 		   	}
 		   	
-		   	
-		   	
-		   	 
 		   	 
 		   	 // Call Instagram and check that the client_id is correct.
 		   	 return ClientInfo::validClientId($client_info['client_id']);
 
 	   	 }
+	   	 
+	   	 
+	   	 
+	   	 /**
+	   	  * Return AJAX request for paginated feed.
+	   	  */
+	   	  public function paginatedFeed()
+	   	  {
+	   	  
+	   	  	  // Get settings.
+	   	  	  $opts = get_option('gdrwig_settings');
+	   	  	  extract($opts,EXTR_SKIP);
+	   	  	  
+	   	  	  // Get next url from post.
+	   	  	  $next_url	= (isset($_POST['next_url'])) ? $_POST['next_url'] : null;
+	   	  	  
+	   	  	  // Get response based on selected feed in settings
+	   	  	  
+	   	  	  switch($feed)
+	   	  	  {
+		   	  	  case 'user':
+		   	  	  
+		   	  	  $config['client_id']	= $client_id;
+		   	  	  $config['id']			= $user['id'];
+		   	  	  $config['count']		= $count;
+		   	  	  $config['endpoint']	= $next_url;
+		   	  	  
+		   	  	  $api = new UsersFeed($config);
+		   	  	  $html = ResponseHtml::thumbs($api::mediaRecentClientId($client_id,$user['id']));
+		   	  	  
+		   	  	  break;
+		   	  	  
+		   	  	  default:
+		   	  	  
+		   	  	  $config['client_id']	= $client_id;
+		   	  	  $config['count']		= $count;
+		   	  	  $config['endpoint']	= $next_url;
+		   	  	  $config['hashtag']	= $hashtag;
+		   	  	  
+		   	  	  $api = new TagFeed($config);
+
+		   	  	  $html = ResponseHtml::thumbs($api::response());
+		   	  	  break;
+		   	  	  
+	   	  	  }
+		   	  
+		   	  echo $html;
+		   	  
+		   	  die();
+	   	  }
+	   	 
 		
 	}
 
@@ -700,5 +756,9 @@ add_action('wp_ajax_gdrwig_update_users_api_data', array('GdrwigFeeds','updateUs
 add_action( 'admin_init', array('GdrwigFeeds','adminStyles'));
 add_action( 'admin_init', array('GdrwigFeeds','adminJs'));
 add_filter('plugin_action_links', 'GdrwigFeeds::actionLinks', 10, 2);
+
+add_action( 'wp_ajax_gdrwig_paginated_feed', array('GdrwigFeeds','paginatedFeed'));
+add_action( 'wp_ajax_nopriv_gdrwig_paginated_feed', array('GdrwigFeeds','paginatedFeed'));
+
 
 

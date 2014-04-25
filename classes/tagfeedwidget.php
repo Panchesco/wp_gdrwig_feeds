@@ -38,22 +38,33 @@ class TagFeedWidget extends WP_Widget
 		
 		
 			case 'user':
+				
 				// Create TagFeed instance.
+				$config = array(
+								'client_id' => $client_id,
+								'access_token' => $access_token,
+								'id' => $user['id'],
+								'count' => $count
+								);
 				
-				new UsersFeed(array('count'=>$opts['count']));
+				new UsersFeed($config);
 				
-				$api = UsersFeed::mediaRecentClientId($client_id,$user['id']);
-				
-				$data = $api->data;
-				
+				$response= UsersFeed::mediaRecentClientId();
 				
 			break;
 		
 			default:
+				
 				// Create TagFeed instance.
-				$api = new TagFeed($client_id,$hashtag,$count);
-				$response = $api->response();
-				$data = $response->data;
+				$config = array(
+								'client_id' => $client_id,
+								'hashtag'	=> $hashtag,
+								'count'		=> $count
+								);
+								
+				$api = new TagFeed($config);
+				$response = $api::response();
+
 			break;
 		
 		
@@ -61,7 +72,7 @@ class TagFeedWidget extends WP_Widget
 		
 		?>
 
-		<div class="tag-feed"><?php echo ResponseHtml::thumbs($data,'standard_resolution'); ?></div>
+		<div class="tag-feed"><?php echo ResponseHtml::thumbs($response,'standard_resolution'); ?></div>
 
 		<?php
 		
@@ -110,20 +121,24 @@ class TagFeedWidget extends WP_Widget
 			case 'user':
 				// Create TagFeed instance.
 				
-				new UsersFeed(array('count'=>$opts['count']));
+				$config['client_id']	= $client_id;
+				$config['id']			= $user['id'];
+				$config['count']		= $count;
+				$api = new UsersFeed($config);
 				
-				$api = UsersFeed::mediaRecentClientId($client_id,$user['id']);
-				
-				
-				echo ResponseHtml::thumbs($api->data,'standard_resolution');
+				echo ResponseHtml::thumbs($api::mediaRecentClientId($client_id,$user['id']));
 				
 			break;
 		
 			default:
 				// Create TagFeed instance.
-				$api = new TagFeed($client_id,$hashtag,$count);
-				$response = $api->response();
-				echo ResponseHtml::thumbs($response->data,'standard_resolution');
+				$config['client_id']	= $client_id;
+				$config['count']		= $count;
+				$config['hashtag']	= $hashtag;
+				$api = new TagFeed($config);
+				
+				echo ResponseHtml::thumbs($api::response());
+				
 			break;
 		
 		

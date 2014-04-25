@@ -12,11 +12,17 @@
 			class TagFeed {
 			
 					
-			public	$endpoint		= "https://api.instagram.com/v1/tags/%s/media/recent?client_id=%s&count=%s";
-			public	$max_tag_id		= null;
-			public	$min_tag_id		= null;
-			public	$next_url		= null;
-			public	$media_count	= null;
+			public	static $endpoint		= "https://api.instagram.com/v1/tags/%s/media/recent?client_id=%s&count=%s";
+			public	static $max_tag_id		= null;
+			public	static $min_tag_id		= null;
+			public	static $next_url		= null;
+			public	static $media_count		= null;
+			public	static $client_id		= null;
+			public	static $hashtag			= null;
+			public	static $count			= 0;
+			
+			
+			
 			
 			/**
 			 * Create instance of class with client_id  and tag data.
@@ -25,41 +31,43 @@
 			 * @param $count - number of results to return per request.
 			 * @return void
 			 */
-			public function __construct($id=false,$tag=false,$count=0)
+			public function __construct($config = array())
 			{
-					
-					// If there's no client id, user will need to get one.
-					if(false === $id || empty($id))
-					{
+			
+					foreach($config as $key => $row)
+						{
 						
-						if(empty($id))
+							self::$$key = $row;
+							
+						}
+						
+						
+						if( self::$client_id == null)
 						{
 						
 							exit('<p>You need a Client ID. You can get one at <a href="http://instagram.com/developer">http://instagram.com/developer</a></p>');
 							
 						}
-					}
+
 					
 					
 					
 					// If there's no tag, exit.
-					if(false === $tag || empty($tag))
+					if( self::$hashtag == null )
 					{
 						exit('<p>You need to include the hashtag parameter. Log into the admin area and update the settings.</p>');
 					}
 					
 					
 					// If there's no tag, exit.
-					if(0 == $count)
+					if( self::$count == 0)
 					{
 						exit('<p>You\'re requesting zero results.</p>');
 					}
 					
 					// Set some default properties.
-					$this->client_id 	= $id;
-					$this->tag			= $tag;
-					$this->count		= $count;
-					$this->endpoint		= $this->endpoint();
+				
+					//###$this->endpoint		= $this->endpoint();
 					
 					
 					
@@ -72,7 +80,7 @@
 				*/
 				public function endpoint()
 				{
-					     return sprintf($this->endpoint,$this->tag,$this->client_id,$this->count);
+					     return sprintf(self::$endpoint,self::$hashtag,self::$client_id,self::$count);
 				}
 				
 
@@ -81,9 +89,9 @@
 				 * Return response as a php object.
 				 * @return mixed str/obj
 				 */
-				 public function response()
+				 public static function response()
 				 {	
-						$response = $this->tagsMediaRecent();
+						$response = self::tagsMediaRecent();
 
 						if(isset($response->meta->error_message))
 						{
@@ -101,37 +109,13 @@
 				 * @param $max_tag_id string
 				 * @return array
 				 */
-				 public function tagsMediaRecent()
+				 public static function tagsMediaRecent()
 				 {
 				 
-				 				$endpoint = $this->endpoint();
-					 			
-								if($this->max_tag_id !== null)
-								{
-									$endpoint.= '&max_tag_id=' . $max_tag_id;	
-								}
-								
+				 				$endpoint = self::endpoint();
+
 								// Get the response
 								$response = json_decode(CurlHelper::getCurl($endpoint));
-								
-								// Set pagination properties if they exist.
-								if(isset($response->pagination->max_tag_id))
-								{
-									$this->max_tag_id = $response->pagination->max_tag_id;
-									
-								}
-								
-								if(isset($response->pagination->min_tag_id))
-								{
-									$this->min_tag_id = $response->pagination->min_tag_id;
-									
-								}
-								
-								if(isset($response->pagination->next_url))
-								{
-									$this->next_url = $response->pagination->next_url;
-									
-								}
 
 							return $response;
 				 }
@@ -144,7 +128,7 @@
 				  public function mediaCount()
 				  {
 					  
-					  $response = json_decode($this->tagData());
+					  $response = json_decode(self::tagData());
 					  
 
 				   	 if(isset($response->meta->error_message))
@@ -172,7 +156,7 @@
 				   {
 				   			
 				   							   			
-				   			$endpoint = 'https://api.instagram.com/v1/tags/'. $this->tag . '?client_id=' . $this->client_id;
+				   			$endpoint = 'https://api.instagram.com/v1/tags/'. self::$hashtag . '?client_id=' . self::$client_id;
 				   			
 				   			$response = CurlHelper::getCurl($endpoint);
 				   			
